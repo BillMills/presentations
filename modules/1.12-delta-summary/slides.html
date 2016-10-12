@@ -1,15 +1,54 @@
-<section data-background="src/modules/1.12-delta-summary/images/title-whale.png" class="blue_bg">
+<section data-background="images/title-whale.png" class="blue_bg">
 	<h2>Docker 1.12 Delta Enablement</h2>
 	</aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<h2>What's New in 1.12</h2>   
+	<h2>What's New in 1.12?</h2>   
     <ul>
-    	<li>stuff</li>
-    	<li>and</li>
-    	<li>things</li>
+    	<li>Swarm Mode</li>
+    	<li>Swarm Service Abstraction</li>
+    	<li>Swarm Security</li>
+    	<li>Distributed Application Bundles</li>
     </ul>
 </section>
-				
-                
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>Swarm Mode</h2> 
+	<pre>docker swarm init</pre>  
+    <ul>
+    	<li>Dynamically add manager and worker nodes to a swarm</li>
+    	<li>Manager redundancy via Raft consensus</li>
+    	<li>No more standing up an external key-value store for network state!</li>
+    </ul>
+</section>		
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>Swarm Service Abstraction</h2> 
+	<pre>docker service create –name frontend <b>–replicas 5</b> -p 80:80/tcp nginx:latest</pre>  
+	<pre>docker service scale frontend=100</pre>
+    <ul>
+    	<li>Abstract a group of containers begind a service name</li>
+    	<li>Crashed containers automatically replaced</li>
+    	<li>Automatic round robin load balancing</li>
+    	<li>Scale and update services on the fly</li>
+    </ul>
+</section>	    
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>Distributed Application Bundle</h2>   
+    <ul>
+    	<li>Definition of networks and images for multi-container app</li>
+    	<li>Conceptual heir to Compose</li>
+    	<li>Compose generates DAB spec file, but <i>not</i> directly compatible with Swarm Mode</li>
+    </ul>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>More Reading</h2>   
+    <ul>
+    	<li>Reference blog post: https://blog.docker.com/2016/06/docker-1-12-built-in-orchestration/</li>
+    	<li>Release Notes: https://github.com/docker/docker/releases</li>
+
+    </ul>
+</section>
