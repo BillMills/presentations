@@ -1,12 +1,12 @@
 
-<section data-background="src/modules/docker-story/src/modules/docker-story/images/title-whale.png" class="blue_bg">
+<section data-background="images/title-whale.png" class="blue_bg">
 	<h2>Introducing Docker</h2>
 	<aside class="notes"><h3>An intro module to get students on message with what docker is, and the priorities and concerns of distributed application dev and ops.</h3>
 	</aside>
 </section>
                 
 <section data-background="#1AAAF8" class="blue_bg">
-	<h4>hands up,</h4>
+	<p>Hands up,</p>
 	<h2>Who's ever been to dependency hell?</h2>   
     <p>(Other circles of hell include scaling hell, deployment hell, and infrastructure hell)</p>
     <aside class="notes">
@@ -26,11 +26,139 @@
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<img source='src/modules/docker-story/images/no-container.jpg'></img>   
-    <p>Deployment problems, pre-containerization</p>
+    <div style='text-align:center'>
+	    <img src='images/no-container.jpg' style="background:none !important; height:60%">
+    	<p>Devops circa 1912</p>
+    </div>
     <aside class="notes">
-        - back in the day, shipping cargo was a big problem
+        - back in the day, shipping cargo was a big problem - here are some 19th century devops struggling to deploy their latest product.
         - huge delays, breakage and theft were caused by the fact that loose cargo had to be packed and unpacked at ports for redistribution
-        - (in the background you can see mid-20th century devops)
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+    	<div style="display:inline-block; width:30%">
+		    <img src='images/ship-container.jpg' style="background:none !important;">
+		    <figcaption style="font-size:50%; line-height:0">Photo <a href="https://www.flickr.com/photos/rhemkes/15365850833/in/photolist-ppQ17D-d6hCUu-9iwthK-7XsFoP-982SCz-dqAmUR-9iwtxv-m63V6u-oH3SMw-E6PsRg-6zgUow-ab8HoF-9B4TT1-o8VoBR-98oagJ-8YcCW4-cFfQ9Y-9UapaB-dLc5pB-pnSzL-rutjxE-2AzAVJ-5o5H1E-dVMhB7-qignqm-qAQ77o-9buvwZ-qkJ7yG-3h5aAH-5mgs5M-afyXuB-owpee1-own5ud-9UhEtv-DTUkrf-xYGwV3-62JAWa-wnJMMK-xjRN18-xjBjtT-JWMJF-rU5bCU-8ABe7k-qmuDY4-J9cfhB-gibiAV-54ZZZb-8xhWxK-4U7q5f-7JR9TF">Roel Hemkes</a>, <a href='https://creativecommons.org/licenses/by/2.0/'>CC-BY 2.0</a></figcaption>
+		</div>
+		<div style="display:inline-block; width:30%">
+	    	<img src='images/train-container.jpg' style="background:none !important;">
+	    	<figcaption style="font-size:50%; line-height:0">Photo <a href="https://www.flickr.com/photos/jayphagan/6547075571/in/photolist-aYxtti-jEwZDt-9ynfEn-icEsKi-it9cKW-it8Uoj-Czrz5T-dLg54S-CErgUA-q2gYJY-qCBWSa-r3FB2F-AxCA49-bF47Z8-icEoxF-iE9zw-Tsrcw-q5HTyq-icE9MY-9cxBph-qkxoU-6kD8oL-e216u4-98qE85-99cjuk-bzRbTQ-7Ha8Mk-dvEZ6h-DAmQyj-rtyyTQ-rziw9g-rgjE8H-rzpk6M-rtxdJw-pR91iD-pikR5s-rjHhdh-pnDBuK-qYU1hF-CGJXvT-pkTTmU-pNuF34-pR8YyM-pweR6p-rgg5PG-pimkc8-pvLpjh-pxN1NC-qqdW1i-quQDSa">Jay Phagan</a>, <a href='https://creativecommons.org/licenses/by/2.0/'>CC-BY 2.0</a></figcaption>
+	    </div>
+	    <div style="display:inline-block; width:30%">
+	    	<img src='images/truck-container.jpg' style="background:none !important;">
+	    	<figcaption style="font-size:50%; line-height:0">Photo <a href="https://www.flickr.com/photos/royluck/5945899601/in/photolist-a4qhNn-abhw3E-7RT4rr-rNPLWc-x19LCV-xCwjRn-6gpi8v-4U8yUp-4ixmeu-9zrtpY-gTwS6j-eebVsR-adg96W-dd86Xh-bQdhiP-bnJCHZ-aYxtti-jEwZDt-9ynfEn-icEsKi-it9cKW-bF47Z8-icEoxF-iE9zw-Tsrcw-q5HTyq-it8Uoj-icE9MY-9cxBph-qkxoU-Czrz5T-dLg54S-DAmQyj-CErgUA-q2gYJY-qCBWSa-r3FB2F-AxCA49-6kD8oL-e216u4-98qE85-99cjuk-bzRbTQ-7Ha8Mk-dvEZ6h-rtyyTQ-rziw9g-rgjE8H-rzpk6M-rtxdJw">Roy Luck</a>, <a href='https://creativecommons.org/licenses/by/2.0/'>CC-BY 2.0</a></figcaption>
+	    </div>
+	    <p>Encapsulation eliminates friction across infrastructure, and standardization facilitates scale.</p>
+    </div>
+    <aside class="notes">
+    	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck - or aws to azure to on-premise - with far less friction.
+    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<p>Docker proposes to be a</p>
+	<h3>framework for service encapsulation</h3>
+    <p>But what are the implications of this for <b>developers</b>, <b>ops</b>, and <b>orgs</b>?</p>
+    <aside class="notes">
+    	- the same opportunities that shipping and manufacturing found in encapsulation and standardization are available to the software industry; Docker proposes to be the framework to enable this, but first we should understand a bit about what the implications of this brave new modularized world are. 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<h3>Monolith to Microservice</h3>
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+	</div>
+    <aside class="notes">
+    	- software components, by which we mean chunks of software that can be independently swapped out, are as old as the dinosaurs
+    	- in a traditional monolith, components might be libraries, whicih communicate via function calls or object instantiation
+    	- but in a service-oriented architecture, independent services communicate via API - much like unix and the web.
+    	- this presents a whole bunch of opportunities and challenges.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Dev opportunity: Service oriented arch is <b>naturally polyglot.</b></p>
+	</div>
+    <aside class="notes">
+    	- while it's possible to wrap and bind libraries from a whole bunch of different languages into one monolith, it's a bit of a pain.
+    	- with encapsulated services, multi-language design is trivially realizable, which makes using the right tool for the job easy.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Dev challenge: Out-of-process communication is <b>expensive</b>.</p>
+	</div>
+    <aside class="notes">
+    	- naively taking your monolith and replacing every function call with an api call is going to be a train wreck
+    	- moving to a containerized world will require developers to re-image inter-component communication
+    	- in our course on distributed application development, we'll talk about things like tolerant reader paradigm and coarse communication.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Ops opportunity: Encapsulated services <b>scale asymmetrically.</b></p>
+	</div>
+    <aside class="notes">
+    	- while monoliths can only be spun up as complete replicas, services can scale asymmetrically; launching more database processes doesn't bring every other service along with it as overhead, like simple replication of a monolith.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Ops challenge: Many-process applications require sophisticated <b>monitoring, security, load-balancing and communication.</b></p>
+	</div>
+    <aside class="notes">
+    	- with so many, and possibly even a variable number, of processes talking to each other, ops teams are going to have to have a sophisticated framework for keeping track of what's going on.
+    	- opportunities present themselves for services that adapt to hardware failures on the fly; Docker services seek to be self-healing in these circumstances
+    	- DDC will help with monitoring and process control, and security is built right into Docker's fundamental design, by leveraging things like kernel namespaces and docker network isolation.
+    	- all these opportunities and challenges form a new sw design paradigm that point to new, or perhaps iterated, roles: those of the distributed application developer and ops manager.
+    	- Now that we know that we want an encapsulated design pattern, how can we get there? Who knows what Conway's law is?
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Conway's Law</h3>
+    <p><i>"Organizations which design systems ... are constrained to produce designs which are copies of the communication structures of these organizations."</i></p>
+    <p> - M. Conway</p>
+    <aside class="notes">
+    	-  As we imagine breaking our monoliths up into a web of encapsulated services, it pays to think of the implications this paradigm has for our orgs. 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Service based orgs naturally map to encapsulated arch, but also bring dev and ops closer together to build, ship and run the service in production. Therefore, minimizing friction between dev and ops is crucial.</p>
+	</div>
+    <aside class="notes">
+    	- every business is always going to be organized into teams or units, for the sake of everyone's sanity.
+    	- if the org chart lumps all of a specialization together, then that team will have to stay on top of their specialization for the entire project; this is a really huge mental model for sophisticated projects, and lumps everything together in a way that naturally rolls downhill to a monolith.
+    	- instead, if we make mixed-skill teams for a service, Conway's law suggests that our applications will have an emergent structure closer to the encapsulation that brings so many benefits.
+        - But, this also implies that each team will be the unit most logically responsible for the lifetime of their service, meaning dev will have to work very closely with ops to not only build, but help ship and run the code they make.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Docker endeavors to:</h3>
+    <ul>
+    	<li>Make containerization of services easy</li>
+    	<li>Make orchestration of services easy</li>
+    	<li>Eliminate friction between development and deployment</li>
+    </ul>
+    <aside class="notes">
+    	- All this business about encapsulation and standardization is what Docker does better than anyone else out there; we call this 'containerization', and Docker makes it a snap.
+    	- In addition to simply encapsulating services, Docker anticiaptes the sophisticated communication needs that arise when putting containerized services together to make an app, and makes this orchestration easy.
+    	- Finally, Docker also empowers developers and ops managers to work more closely together through the lifetime of a service, by removing barriers between dev and ops; as we'll see in the course of the workshop, ops teams can provide containerized services that are easy to stand up during prototyping and development, and which scale to production seamlessly.
     </aside>
 </section>
