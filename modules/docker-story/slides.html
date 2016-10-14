@@ -116,10 +116,21 @@
 <section data-background="#1AAAF8" class="blue_bg">
 	<div style="text-align:center">
 		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+		<p>Ops opportunity: Service arch means a single instance of an app can take advantage of <b>multiple nodes</b>; applications instances are decoupled from node instances.</p>
+	</div>
+    <aside class="notes">
+    	- what's more, there's no reason new service processes all need to live on the same machine, either; it should be possible to provision new nodes dedicated to providing resources for the services that need them.
+    	- Service architecture makes it straightforward to imagine a complete decoupling of instances of our app, from instances of infrasturcture. many:1, 1:many, 1:1 and many:many relationships are all completely viable.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<div style="text-align:center">
+		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
 		<p>Ops challenge: Many-process applications require sophisticated <b>monitoring, security, load-balancing and communication.</b></p>
 	</div>
     <aside class="notes">
-    	- with so many, and possibly even a variable number, of processes talking to each other, ops teams are going to have to have a sophisticated framework for keeping track of what's going on.
+    	- with so many, and possibly even a variable number, of processes talking to each other, possibly distributed across nodes, ops teams are going to have to have a sophisticated framework for keeping track of what's going on.
     	- opportunities present themselves for services that adapt to hardware failures on the fly; Docker services seek to be self-healing in these circumstances
     	- DDC will help with monitoring and process control, and security is built right into Docker's fundamental design, by leveraging things like kernel namespaces and docker network isolation.
     	- all these opportunities and challenges form a new sw design paradigm that point to new, or perhaps iterated, roles: those of the distributed application developer and ops manager.
@@ -153,7 +164,7 @@
 	<h3>Docker endeavors to:</h3>
     <ul>
     	<li>Make containerization of services easy</li>
-    	<li>Make orchestration of services easy</li>
+    	<li>Make service orchestration across processes and nodes easy</li>
     	<li>Eliminate friction between development and deployment</li>
     </ul>
     <aside class="notes">
