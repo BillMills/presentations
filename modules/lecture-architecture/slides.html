@@ -1,0 +1,109 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+    <h2>Microservice Architecture with Docker</h2>
+    <aside class="notes"><h3>An introduction to the principles of microservice architecture featuring Docker, and a chance to explore these ideas in context with the student's own projects.</h3>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>What makes a good microservice architecture?</h2>
+    <p>Or a bad one?</p>   
+    <aside class="notes">
+        - remind students of the process-to-process nature of microservice architecture, and the goals of independent service deployment and scaling
+        - then lead a discussion of what MSA needs to succeed, and / or what will doom it to failure
+        - make sure to connect following slides to students' ideas from this section.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p>The cardinal points of good microservice architecture:</p>
+    <h2>Encapsulation, communication, scalability & organization</h2>
+    <aside class="notes">
+        - done well, each of these top line points add up to keeping services cleanly independent
+        - service independence is the opposite of a many-service monolith; arch can superficially look like MSA, but failures in any one of the above values can drag the application back to being an effective monolith. 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>1. Encapsulation</i></p>
+    <h2>Encapsulation consists of:</h2>
+    <ul>
+        <li>Service Independence</li>
+        <li>Service Scope</li>
+    </ul>
+    <aside class="notes">
+        - services can be considered encapsulated if they are independent from each other, and limit their scope
+        - but how do we define these things in a useful, operational manner?
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>1. Encapsulation / Service Independence</i></p>
+    <h3>Microservice in name only:</h3>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <p>Change a shared resource, and everything needs to be rebuilt and re-released - just like a monolith! Scrapping and re-engineering an entire service shouldn't break anything, as long as the service contract is respected.</p>
+    <aside class="notes">
+        - practical goal: services should be able to be updated unilaterally
+        - tech test: changing a service should not have any possibility of breaking another service, modulo respecting the service contract
+        - spit test: "if I rewrote this entire service in another language with a different set of tools, would anything else break?"
+        - example of bad service isolation is a shared library
+        - changes to the library necessitate rerunning the test suite of every downstream service
+        - therefore have to deploy services together
+        - have accidentally recreated a monolith!
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>1. Encapsulation / Service Scope</i></p>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <p>Each service corresponds to one verb; or similarly, a service should be responsible for exactly one transformation of data.</p>
+    <aside class="notes">
+        - well scoped service does one thing well; unix philosophy
+        - try dividing by verb, or by transform
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>1. Encapsulation / Service Scope</i></p>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <p>If you find yourself sharing resources between services; releasing two services together; or having chatty communication between services, you may have gone too far - consider merging them into one service.</p>
+    <aside class="notes">
+        - bear in mind, however, that inter-process communication is expensive, and syncronizing databases is a pain; if you're doing a lot of this between two services, it might make sense to merge them into the same service.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>2. Communication</i></p>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <h2>Dumb pipes, smart services.</h2>
+    <p>Nobody communicates better than the web. JSON payloads across RESTful HTTP APIs are robust, easy to develop, and well-supported in every language.</p>
+    <aside class="notes">
+        - the basic maxim of MSA communication; don't let logic creep into the no mans land between services
+        - complicated pipes like enterprise service busses end up accruing logic that makes them a service in their own right, tightening coupling between the true services that use them.
+        - APIs should obey the tolerant reader paradigm: extra info piggybacking on the payload shouldn't break anything. JSON is an excellent example of a realization of this.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>3. Scalability</i></p>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <h2>Build for services, not for processes.</h2>
+    <p>If you rely on the state of a service, you rely on interacting with a specific process rather than the service itself. A stateless service is (often) a scalable service.</p>
+    <aside class="notes">
+        - One thing that Docker truly excells at is scaling services: docker engine will natively distribute requests to a service across all instances of that service, without any explicit logic to discover where the corresponding processes are running.
+        - Design your service performance to be linear in number of containers.
+        - One key consideration is statelessness: if a service is stateless, an inbound request can be routed to any instance of the service, allowing linear scaling.
+        - closely related to idempotent services, which are more stable and easier to debug
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <p><i>4. Organization</i></p>
+    <img src='images/placeholder-whale.png' style="background:none !important; height:60%">
+    <p>Your org chart is the best practice that binds them all.</p>
+    <aside class="notes">
+        - Recall conway's law: if your org is arranged in cross-functional teams that are responsible for the entire life cycle of their service, you will be much more likely to actually achieve the other three elements of this list of best practices
+        - conversely, if you warehouse all your DBAs in the basement, you'll get a monolithic database layer, etc.
+        - development is fastest and most consistent with MSA principles when each team can be as ignorant as possible of all the other teams
+        - encapsulation is well served if a service is simple enough that every member of the team can understand everything about their service: well-grasped mental models lead to fast problem solving.
+    </aside>
+</section>
