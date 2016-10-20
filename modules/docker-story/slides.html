@@ -54,7 +54,7 @@
     </div>
     <aside class="notes">
     	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck - or aws to azure to on-premise - with far less friction.
-    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically.
+    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically. The history of technology and business is rife with the same pattern, and there's no reason software development can't benefit from the same precedent.
     </aside>
 </section>
 
@@ -76,11 +76,32 @@
     	- software components, by which we mean chunks of software that can be independently swapped out, are as old as the dinosaurs
     	- in a traditional monolith, components might be libraries, which communicate via function calls or object instantiation
     	- but in a service-oriented architecture, independent services communicate via API - much like unix and the web.
-    	- this presents a whole bunch of opportunities and challenges.
+    	- what are some of the opportunities and challenges microservice architecture presents? Discuss; lead the class to consider asymmetric scaling, hardware utilization, closer coupling between dev and ops, need for sophiticated monitoring and control, and conway's law.
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
+	<p>Docker will help you develop for</p>
+	<h2>Services, not processes</h2>
+	<p>and deploy on</p>
+    <h2>Networks, not nodes.</h2>
+    <aside class="notes">
+    	- the benefits of encapsulation and parallelism come from being able to interact with a service, without knowing or caring what specific process you're interacting with. 
+    	- the benefits of being able to harness varied and variable hardware come from being able to interact completely transparently with a collection of nodes.
+    	- the first half of the docker way of doing things, is to make services first class conceptual objects that can be interacted with directly, and similarly to federate disparate hardware into a single entity, with bokerage between elements completely under the hood.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<p>Docker helps create a</p>
+	<h2>virtuous circle between dev and ops</h2>
+	<p>via service-oriented registry, RBAC, and control planes.</p>
+    <aside class="notes">
+    	- the organizational demands pointed to by conway's law and the opportunity for teams to own a service from prototype to product mean that enterprise-level MSA requires tooling to help ops and dev share containers in a virtuous circle that eliminates friction.
+    </aside>
+</section>
+
+<!--section data-background="#1AAAF8" class="blue_bg">
 	<div style="text-align:center">
 		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
 		<p>Dev opportunity: Service oriented arch is <b>naturally polyglot.</b></p>
@@ -158,7 +179,7 @@
     	- instead, if we make mixed-skill teams for a service, Conway's law suggests that our applications will have an emergent structure closer to the encapsulation that brings so many benefits.
         - But, this also implies that each team will be the unit most logically responsible for the lifetime of their service, meaning dev will have to work very closely with ops to not only build, but help ship and run the code they make.
     </aside>
-</section>
+</section-->
 
 <section data-background="#1AAAF8" class="blue_bg">
 	<h3>Docker endeavors to:</h3>
