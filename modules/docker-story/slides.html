@@ -53,42 +53,48 @@
 	    <p>Encapsulation eliminates friction across infrastructure, and standardization facilitates scale.</p>
     </div>
     <aside class="notes">
-    	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck - or aws to azure to on-premise - with far less friction.
-    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically. The history of technology and business is rife with the same pattern, and there's no reason software development can't benefit from the same precedent.
+    	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck with far less friction.
+    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically. The history of technology and business is rife with the same pattern...
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<p>Docker proposes to be a</p>
-	<h3>framework for service encapsulation</h3>
+	<p>The most basic thing Docker provides is a</p>
+	<h2>framework for service encapsulation</h2>
     <p>But what are the implications of this for <b>developers</b>, <b>ops</b>, and <b>orgs</b>?</p>
     <aside class="notes">
-    	- the same opportunities that shipping and manufacturing found in encapsulation and standardization are available to the software industry; Docker proposes to be the framework to enable this, but first we should understand a bit about what the implications of this brave new modularized world are. 
+    	- ...and Docker proposes to implement that pattern of encapsulation and standardization for the software development community, by packaging services with their minimal dependencies in a way that can be run anywhere: ship, train or truck, or aws, azure or on prem as the case may be.
+    	- All of which sounds nice - but what are the practical implications of this brave new modularized world? Given this technology, what would you actually do with it? What are the opportunities and challenges it presents? 
+    	- *lead the class in an open discussion for 10-15min on opportunities and challenges of service encapsulation. Highlight opportunities for monolith densification; microservice architecture; and removal of friction between ops and dev. Highlight challenges of process and node brokerage; orchestration; and management issues (security, registry, RBAC...)*
+    	- *mention roll on / roll off shipping coming between break bulk and full containerization to lead them to monolith densification if necessary.* 
+    	- *discuss Conway's law if necessary, to lead students to how dev and ops can work more effectively together, particularly in a service-oriented org.*
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<h3>Monolith to Microservice</h3>
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-	</div>
+	
+	<p>Encapsulation supercharges:</p>
+	<ul>
+		<li>Monolith Densification</li>
+		<li>Service-Based Architecture</li>
+		<li>Devops</li>
+	</ul>
+	<p>But all three of these things are served by an added layer of abstraction that simplifies the coordination of encapsulated services. <i>Distributed Application Architecture</i> is that abstraction.</p>
+	
     <aside class="notes">
-    	- software components, by which we mean chunks of software that can be independently swapped out, are as old as the dinosaurs
-    	- in a traditional monolith, components might be libraries, which communicate via function calls or object instantiation
-    	- but in a service-oriented architecture, independent services communicate via API - much like unix and the web.
-    	- what are some of the opportunities and challenges microservice architecture presents? Discuss; lead the class to consider asymmetric scaling, hardware utilization, closer coupling between dev and ops, need for sophiticated monitoring and control, and conway's law.
+    	- In all these cases we've talked about, there's a common theme: encapsulation and standardization make it easy to spin up lots of these processes in lots of different contexts, by design - but this gets us into situations where we need to coordinate between all these processes at once, possibly in varying numbers, and possibly across varying numbers of machines. 
+    	- So, we want not only to encapsulate our processes, but abstract away the concept of individual processes while developing, and individual nodes while deploying.
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<p>Docker will help you develop for</p>
+	<p>Dockerized Distributed Application Architecture will help you develop for</p>
 	<h2>Services, not processes</h2>
 	<p>and deploy on</p>
     <h2>Networks, not nodes.</h2>
     <aside class="notes">
-    	- the benefits of encapsulation and parallelism come from being able to interact with a service, without knowing or caring what specific process you're interacting with. 
-    	- the benefits of being able to harness varied and variable hardware come from being able to interact completely transparently with a collection of nodes.
-    	- the first half of the docker way of doing things, is to make services first class conceptual objects that can be interacted with directly, and similarly to federate disparate hardware into a single entity, with bokerage between elements completely under the hood.
+        - The mental model that provides this abstraction is called distributed application architecture, and Docker provides the tools to make this paradigm simple to develop and deploy for.
+    	- the first half of the docker way of doing things, is to federate encapsulated processes into a single service, and similary federate many nodes into a single swarm, and make these services and swarms the first-class conceptual objects with which you will interact.
     </aside>
 </section>
 
@@ -97,100 +103,22 @@
 	<h2>virtuous circle between dev and ops</h2>
 	<p>via service-oriented registry, RBAC, and control planes.</p>
     <aside class="notes">
-    	- the organizational demands pointed to by conway's law and the opportunity for teams to own a service from prototype to product mean that enterprise-level MSA requires tooling to help ops and dev share containers in a virtuous circle that eliminates friction.
+    	- the other half of the docker way of doing things is to use the portability of software containers to bring dev and ops closer together.
+    	- in practise, if we're going to be moving so seamlessly between dev and ops, we need the right enterprise tooling to coordinate all these transactions, between containers but especially between humans.
     </aside>
 </section>
-
-<!--section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Dev opportunity: Service oriented arch is <b>naturally polyglot.</b></p>
-	</div>
-    <aside class="notes">
-    	- while it's possible to wrap and bind libraries from a whole bunch of different languages into one monolith, it's a bit of a pain.
-    	- with encapsulated services, multi-language design is trivially realizable, which makes using the right tool for the job easy.
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Dev challenge: Out-of-process communication is <b>expensive</b>.</p>
-	</div>
-    <aside class="notes">
-    	- naively taking your monolith and replacing every function call with a network request is going to be a train wreck
-    	- moving to a containerized world will require developers to re-image inter-component communication
-    	- in our course on distributed application development, we'll talk about things like tolerant reader paradigm and coarse communication.
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Ops opportunity: Encapsulated services <b>scale asymmetrically.</b></p>
-	</div>
-    <aside class="notes">
-    	- while monoliths can only be spun up as complete replicas, services can scale asymmetrically; launching more database processes doesn't bring every other service along with it as overhead, like simple replication of a monolith.
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Ops opportunity: Service arch means a single instance of an app can take advantage of <b>multiple nodes</b>; applications instances are decoupled from node instances.</p>
-	</div>
-    <aside class="notes">
-    	- what's more, there's no reason new service processes all need to live on the same machine, either; it should be possible to provision new nodes dedicated to providing resources for the services that need them.
-    	- Service architecture makes it straightforward to imagine a complete decoupling of instances of our app, from instances of infrasturcture. many:1, 1:many, 1:1 and many:many relationships are all completely viable.
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Ops challenge: Many-process applications require sophisticated <b>monitoring, security, load-balancing and communication.</b></p>
-	</div>
-    <aside class="notes">
-    	- with so many, and possibly even a variable number, of processes talking to each other, possibly distributed across nodes, ops teams are going to have to have a sophisticated framework for keeping track of what's going on.
-    	- opportunities present themselves for services that adapt to hardware failures on the fly; Docker services seek to be self-healing in these circumstances
-    	- DDC will help with monitoring and process control, and security is built right into Docker's fundamental design, by leveraging things like kernel namespaces and docker network isolation.
-    	- all these opportunities and challenges form a new sw design paradigm that point to new, or perhaps iterated, roles: those of the distributed application developer and ops manager.
-    	- Now that we know that we want an encapsulated design pattern, how can we get there? Who knows what Conway's law is?
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<h3>Conway's Law</h3>
-    <p><i>"Organizations which design systems ... are constrained to produce designs which are copies of the communication structures of these organizations."</i></p>
-    <p> - M. Conway</p>
-    <aside class="notes">
-    	-  As we imagine breaking our monoliths up into a web of encapsulated services, it pays to think of the implications this paradigm has for our orgs. 
-    </aside>
-</section>
-
-<section data-background="#1AAAF8" class="blue_bg">
-	<div style="text-align:center">
-		<img src='images/placeholder-whale.png' style="background:none !important; height:60%">
-		<p>Service based orgs naturally map to encapsulated arch, but also bring dev and ops closer together to build, ship and run the service in production. Therefore, minimizing friction between dev and ops is crucial.</p>
-	</div>
-    <aside class="notes">
-    	- every business is always going to be organized into teams or units, for the sake of everyone's sanity.
-    	- if the org chart lumps all of a specialization together, then that team will have to stay on top of their specialization for the entire project; this is a really huge mental model for sophisticated projects, and lumps everything together in a way that naturally rolls downhill to a monolith.
-    	- instead, if we make mixed-skill teams for a service, Conway's law suggests that our applications will have an emergent structure closer to the encapsulation that brings so many benefits.
-        - But, this also implies that each team will be the unit most logically responsible for the lifetime of their service, meaning dev will have to work very closely with ops to not only build, but help ship and run the code they make.
-    </aside>
-</section-->
 
 <section data-background="#1AAAF8" class="blue_bg">
 	<h3>Docker endeavors to:</h3>
     <ul>
     	<li>Make containerization of services easy</li>
-    	<li>Make service orchestration across processes and nodes easy</li>
+    	<li>Make service orchestration across processes and machines easy</li>
     	<li>Eliminate friction between development and deployment</li>
     </ul>
     <aside class="notes">
-    	- All this business about encapsulation and standardization is what Docker does better than anyone else out there; we call this 'containerization', and Docker makes it a snap.
-    	- In addition to simply encapsulating services, Docker anticiaptes the sophisticated communication needs that arise when putting containerized services together to make an app, and makes this orchestration easy.
-    	- Finally, Docker also empowers developers and ops managers to work more closely together through the lifetime of a service, by removing barriers between dev and ops; as we'll see in the course of the workshop, ops teams can provide containerized services that are easy to stand up during prototyping and development, and which scale to production seamlessly.
+    	- All this business about encapsulation and standardization is what Docker does better than anyone else out there; we call this 'containerization'.
+    	- As we also saw so far, containerization naturally leads to the need to coordinate containers, and even machines; we call this 'orchestration'.
+    	- Finally, Docker also empowers developers and ops managers to work more closely together through the lifetime of a service, by removing barriers between dev and ops.
+    	- Docker endeavors to provide the tooling to make containerization, orchestration, and frictionless deployment a snap.
     </aside>
 </section>
