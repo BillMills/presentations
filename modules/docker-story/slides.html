@@ -132,3 +132,57 @@
     	- Docker endeavors to provide the tooling to make containerization, orchestration, and frictionless deployment straightforward.
     </aside>
 </section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Docker Engine</h3>
+    <img style='background-color:rgba(0,0,0,0);' src='images/basic-engine.png'></img>
+    <p>One Docker Engine runs on every linux host, using tools like kernel namespacing and control groups to enable the creation of isolated containers.</p>
+    <aside class="notes">
+        - Docker Engine is the funamental runtime that sits on top of linux and manges containers. One engine runs per host.
+        - Docker Engine effectively slices up the hosts kernel by partitioning it; pause for a second and comapre this to VMs. There's no hypervisor here, and no guest OS; and yet we can still isolate our services and their dependencies, but with much less overhead. This is the fundamental magic of Docker.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Docker Machine</h3>
+	<img style='max-width:40%; background-color:rgba(0,0,0,0); float:left;' src='images/basic-machine.png'></img>
+    <p style='margin-top:200px;'>Docker Machine provisions VMs to act as hosts, as per Docker for Mac and Docker for Windows.</p>
+    <aside class="notes">
+        - Hosts don't need to be bare metal, they can be vms as well
+        - Docker Machine provisions VMs to use as Docker hosts; that's what Docker for Mac and Docker for Windows use to stand up a containerizable environment. 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Docker Compose & Docker Swarm Mode</h3>
+	<img style='max-width:50%; background-color:rgba(0,0,0,0);' src='images/basic-compose.png'></img>
+	<img style='max-width:50%; background-color:rgba(0,0,0,0);' src='images/basic-swarm.png'></img>
+    <p>Docker Compose scales services to multiple containers, and orchestrates them together all on a single node; Docker Swarm federates multiple Engines into a single service-management entity.</p>
+    <aside class="notes">
+    	- Compose and Swarm provide the cross-container and cross-node orchestration we discussed, federating processes into services and nodes into networks.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h3>Docker Datacenter</h3>
+	<img style='max-width:60%; background-color:rgba(0,0,0,0); float:left;' src='images/basic-ddc.png'></img>
+    <p style='margin-top:100px;'>Docker Datacenter presents a suite of enterprise-grade tools, like Content Trust for images signed by your team, Trusted Registry to maintain a private library of validated images, and Universal Control Plane to provide a convenient UI as well as RBAC, LDAP and more.</p>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>Docker Training</h2>
+		<ul>
+			<li>Enablement for all these products</li>
+			<li>Deep dives on special topics like networking, security and architecture</li>
+			<li>Docker Distributed Application Engineer & Ops Certifications (coming soon!)</li>
+		</ul>
+		<p>e: training@docker.com</p>
+		<p>w: training.docker.com</p>
+
+    <aside class="notes">
+
+    </aside>
+</section>
