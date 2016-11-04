@@ -1,0 +1,169 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+	<h2>Docker Networking</h2>
+	<aside class="notes"></aside>
+</section>
+                
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Module Objectives</h2>
+    <ul>
+      <li>Introduce Docker networking goals</li>
+      <li>Understand the Container Network Model</li>
+      <li>Understand the role of Docker network drivers</li>
+      <li>Deep dive into bridge & overlay networks</li>
+      <li>Physical networks</li>
+      <li>Service discovery</li>
+      <li>Load balancing</li>
+      <li>Security</li>
+    </ul>  
+    <aside class="notes">
+    	These are the topics we’ll try to touch on in the next n hours. To start - what are the key concerns a service network needs to deliver on? (discuss)
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker Networking</h2>
+    <p>prioritizes service discovery, load balancing, security, performance, scalability, <b>but most importantly portability</b>.</p>
+    <aside class="notes">
+		In some sense, the first 5 are tablestakes for any distributed application; Docker’s special sauce is the last one - portability across and between infrastructure. What abstractions are necessary to achieve network portability in practise? (discuss; lead students to think about network virtualization and container network isolation).
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Container Network Model</h2>
+    <img style='max-width: 80%' src='images/cnm.png'></p>
+    <aside class="notes">
+    	at high level, all container networks follow a model consisting of three parts:
+    	 - the network sandbox, which on linux machines is exactly a linux network namespace. This is a security feature of container networking that provides independent routing tables and network interfaces to each container. This provides the network isolation we decided we wanted above.
+    	 - the endpoint, which provides a channel for traffic to and from the network namespace. In practice, this typically appears as eth0 (etc) inside the contianer, and accepts an external veth connection (veth == virtual ethernet connection, used to route traffic between network namespaces). The endpoint serves to abstract network details away from the application logic, so that different networks can be swapped out easily.
+    	 - the network itself, an object whose only contract is to provide connectivity between containers; an example of this that we'll dig into in detail in a moment is a linux bridge.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Network Drivers</h2>
+    <ul>
+    	<li>Define the behavior of the network in the CNM</li>
+    	<li>Are container agnostic thanks to the endpoint abstraction</li>
+    	<li>Complete list: see the docs, but we will focus on <b>bridge</b> and <b>overlay</b>.</li>
+    </ul>
+    <aside class="notes">
+    	All the fun in the CNM comes from the network drivers. You may have noticed that the contract for networks in the CNM is kind of trivial - anything that connects containers counts. Correspondingly, there's a bunch of different drivers out there, and you can even create your own; today we're going to focus on the two workhorses of docker networking - bridge, and overlay.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Bridge Network</h2>
+    <img style='max-width: 40%; float:left;' src='images/bridge1.png'></p>
+    <div style='float:right; max-width: 50%;'>
+    	<h3>Birth of a Bridge Net:</h3>
+    	<pre>docker network create -d bridge my_bridge ...</pre>
+    	<ul>
+    		<li>Engine triggers driver to create a network</li>
+    		<li>Bridge driver instantiates Linux bridge & sets up iptables</li>
+    	</ul>
+    	<pre>docker run --net my_bridge</pre>
+    	<ul>
+    		<li>driver spawns veth</li>
+    		<li>ends of veth plugged into container endpoint and linux bridge</li>
+    	</ul>
+    </div>
+    <aside class="notes">
+    	- simplest nontrivial network is the Bridge network
+    	- uses a linux bridge as the CNM's network (linux bridges are a virtualization of a network switch, providing level 2 routing via MAC address)
+    	- (walk through birth of bridgenet)
+    	- note that for linux networking fans, there's nothing actually new here: a linux bridge is plugged into a network namespace via a veth; in some sense, container networking IS linux networking.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Default Bridge Routing Demo</h2>
+    <p>SSH into any machine with docker installed, and try the following:</p>
+    <pre>
+    	host> docker run -it --name c1 busybox sh
+    	c1> ip address   # look for eth0; compare MAC to IP
+    	host> brctrl show
+    	c1> route -n
+    	host> route -n
+    </pre>
+    <aside class="notes">
+    	 - start by standing up any old container with no network specifics defined at all
+    	 - note the container MAC addresses are just encodings of their IP, to avoid collisions.
+    	 - docker always sets up a default network called `bridge`, which consists of a linux bridge called `docker0`. By default, all new containers are plugged into their host's `docker0` bridge, so they can talk to each other.
+    	 - back inside the container, we can see traffic is directed to eth0, and thus externally down the veth and to the bridge. 
+    	 - additionally, `docker0` appears as a device on the host's routing table.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>User-Defined Bridge Network Demo</h2>
+    <p>On the same node as before:</p>
+    <pre>
+    	host> docker network create -d bridge my_bridge
+    	host> docker run -itd --name c2 --net my_bridge busybox sh
+    	host> docker run -itd --name c3 --net my_bridge --ip 10.0.0.254 busybox sh
+    	host> brctl show
+    	host> docker network ls # compare network ID and bridge name
+    	host> ip link	
+    </pre>
+    <aside class="notes">
+    	 - start by creating a simple bridge network
+    	 - stand up a container on your network, with no other specifics
+    	 - stand up another container with a user-defined ip
+    	 - your new bridge has two veths plugged into it, one for each container
+    	 - note the default network ID matches the bridge name.
+    	 - all Docker has done is stand up a bunch of linux devices
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>User Defined Bridges</h2>
+    <img style='max-width: 80%' src='images/bridge2.png'></p>
+    <p>Note that bridge networks are firewalled by default.</p>
+    <aside class="notes">
+    	- here's the setup you built over the last two demos.
+    	- one key feature of bridge networks and most docker networks is that containers can communicate across their namespaces via their shared linux bridge if they're on the same network, but are firewalled against containers on different networks by the iptables config of each bridge.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>External Connectivity</h2>
+    <img style='max-width: 80%' src='images/nat.png'></p>
+    <p>Bridge networks are not exposed on the external network, but containers can be port mapped.</p>
+    <aside class="notes">
+    	- in addition to firewalling against other networks, bridge networks are not accessible by default from the external network; containers have IPs assigned to them from the bridge's subnet, and that's it.
+    	- containers are allowed by default to send egress traffic along a random port mapping, and receive a response along the same.
+    	- ports can also be explicitly mapped from container to host via a --publish directive at the cli, mappings in a Dockerfile or Compose file, or via UCP.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Container Reachability</h2>
+    <ul>
+    	<li>From container c3 that you created in the demo, try <pre>ping c2</pre></li>
+    	<li>Also from c3, try <pre>nslookup c2</pre>; do the results make sense? Discuss with the people sitting near you.</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Network Aliasing</h2>
+    <p>Discuss each step with your neighbours; try to explain the results you get to each other.</p>
+    <ul>
+    	<li>Create a couple of new containers, this time with network aliases: 
+    		<pre>
+    			docker run -itd --name c4 --net my_bridge –net-alias foo busybox sh
+    			docker run -itd --name c5 --net my_bridge –net-alias bar busybox sh
+    		</pre>
+    	</li>
+    	<li>Ping c4 from c5.</li>
+    	<li>Now try `ping foo` from c5; discuss.</li>
+    	<li>Create another container c6 on the foo alias.</li>
+    	<li>Ping foo again from c5, and discuss.</li>
+    	<li>What does `nslookup foo` give from c5?</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
