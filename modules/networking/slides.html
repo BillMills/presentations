@@ -279,7 +279,7 @@
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-    <h2>External Load Balancing</h2>
+    <h2>External Load Balancing: Mesh Nets</h2>
     <pre>
    		#Create a service with two replicas and export port 8000 on the cluster
 		$ docker service create --name app --replicas 2 --network appnet -p 8000:80 nginx
@@ -303,5 +303,33 @@
     <p>Set up a configuration that matches the diagram. Visit the nginx service from each IP, and observe the external load balancing.</p>
     <aside class="notes">
 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Data Plane Security</h2>
+    <pre>
+    	docker network create -d overlay --opt encrypted=true <NETWORK_NAME>
+    </pre>
+    <img style='max-width: 80%' src='images/ipsec.png'></img>
+    <aside class="notes">
+    	- Control plane communications (gossip syncronization and manager->worker task assignment) is always mutually TLS encrypted, absolutely no setup required; data plane encryption can be optionally turned on with this flag.
+    	- Data plane encryption sticks an IPSec layer in front of the physical network connection on all nodes joined to the Swarm; Swarm managers periodically regenerate keys distributed to all hosts on the overlay network.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Conclusion: Priorities Revisited</h2>
+    <ul>
+    	<li><b>Portability</b>: VXLAN, linux kernel networking features, CNM abstraction</li>
+    	<li><b>Service Discovery</b>: IPVS, gossip network</li>
+    	<li><b>Load Balancing</b>: IPVS, mesh net</li>
+    	<li><b>Security</b>: default mutual TLS (control plane); optional IPSec layer (data plane)</li>
+    	<li><b>Performance & Scalability</b>: gossip net w/ topology aware communication; service abstraction</li>
+    </ul>
+    <aside class="notes">
+    	- We started out by discussing our priorities for container networks: portability, service discovery, load balancing, security, performance and scalability.
+    	- We walked through the two big workhorses of container networking, bridge and overlay networks, and followed packets around both, and in so doing investigated the specific strategies Docker uses to deliver on these priorities (discuss).
+    	- Above all, the take home lesson from all this is that Docker networking heavily leverages the battle-tested networking features of the linux kernel - bridges, vxlan, iptables, veth, network namespaces, along with the high-level abstraction of the container networking model, to build networks that can be smoothly and automatically deployed and scaled on any infrastructure.
     </aside>
 </section>
