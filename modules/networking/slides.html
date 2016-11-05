@@ -30,7 +30,7 @@
 
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>The Container Network Model</h2>
-    <img style='max-width: 80%' src='images/cnm.png'></p>
+    <img style='max-width: 80%' src='images/cnm.png'></img>
     <aside class="notes">
     	at high level, all container networks follow a model consisting of three parts:
     	 - the network sandbox, which on linux machines is exactly a linux network namespace. This is a security feature of container networking that provides independent routing tables and network interfaces to each container. This provides the network isolation we decided we wanted above.
@@ -53,7 +53,7 @@
 
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>The Bridge Network</h2>
-    <img style='max-width: 40%; float:left;' src='images/bridge1.png'></p>
+    <img style='width: 45%; float:left;' src='images/bridge1.png'></img>
     <div style='float:right; max-width: 50%;'>
     	<h3>Birth of a Bridge Net:</h3>
     	<pre>docker network create -d bridge my_bridge ...</pre>
@@ -117,7 +117,7 @@
 
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>User Defined Bridges</h2>
-    <img style='max-width: 80%' src='images/bridge2.png'></p>
+    <img style='max-width: 80%' src='images/bridge2.png'></img>
     <p>Note that bridge networks are firewalled by default.</p>
     <aside class="notes">
     	- here's the setup you built over the last two demos.
@@ -127,7 +127,7 @@
 
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>External Connectivity</h2>
-    <img style='max-width: 80%' src='images/nat.png'></p>
+    <img style='max-width: 80%' src='images/nat.png'></img>
     <p>Bridge networks are not exposed on the external network, but containers can be port mapped.</p>
     <aside class="notes">
     	- in addition to firewalling against other networks, bridge networks are not accessible by default from the external network; containers have IPs assigned to them from the bridge's subnet, and that's it.
@@ -163,6 +163,144 @@
     	<li>Ping foo again from c5, and discuss.</li>
     	<li>What does `nslookup foo` give from c5?</li>
     </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Multi-Host Networking</h2>
+    <p>Docker Swarm allows the distribution of containers and services across any number of hosts; what are the fundamental requirements for a container on one host to communicate with a container on another host?</p>
+    <aside class="notes">
+    	Given what we’ve seen so far with firewalled container networks addressed by private, network specific subnets, what would need to happen to successfully communicate in a multi-host setting? (discuss; lead class to thinking about traversing the external network starting from an address in a local subnet (ie vxlan), particularly in the context of linux bridges trying to do level 2 communications). Previously the linux bridge could just bounce L2 packets around as it pleased, but now there's this whole L3 network to traverse.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>VXLAN Packet Walk</h2>
+    <img style='max-width: 80%' src='images/packetwalk.png'></img>
+    <aside class="notes">
+    	 - c1 does a DNS lookup for c2. Since both containers are on the same overlay network the Docker Engine local DNS server resolves c2 to its overlay IP address 10.0.0.3.
+    	 - We do these communications with linux bridges, so c1 generates an L2 frame destined for the MAC address of c2.
+    	 - The frame is encapsulated with a VXLAN header by the overlay network driver. The distributed overlay control plane manages the locations and state of each VXLAN tunnel endpoint so it knows that c2 resides on host-B at the physical address of 192.168.0.3. That address becomes the destination address of the underlay IP header.
+    	 - Once encapsulated the packet is sent across the physical network.
+    	 - The packet arrives at the eth0 interface of host-B and is decapsulated by the overlay network driver. The original L2 frame from c1 is passed to the c2's eth0 interface and up to the listening application.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>VXLAN Packet Walk</h2>
+    <img style='max-width: 80%' src='images/packetwalk-nigel.png'></img>
+    <aside class="notes">
+    	- In a little more detail, overlay networks share a lot of the plumbing as bridge networks. Containers still have a veth plugging them into a linux bridge; what's new here is the VXLAN Tunnel Endpoint (VTEP) hanging out on each host; these are the devices responsible for doing the wrapping and unwrapping illustrated previously.
+    	- Let's walk through C1 trying to ping C2 in the figure:
+    	- C1 does its DNS lookup for C2, and finds its IP of 10.0.0.4
+    	- packet goes to the linux bridge, as usual
+    	- the first time, the linux bridge won't have an entry for the MAC address of C2, so it floods all ports with the packet.
+    	- the VTEP catches this and responds with its own MAC address - now the bridge will send all such traffic to the VTEP
+    	- the VTEP on node1 encapsulates the ping with the headers it needs to traverse the physical network and arrive at UDP port 4789.
+    	- the VTEP on node2 decapsulates the ping and sends it to the local linux bridge, which recognizes C2's MAC address and delivers the packet.
+    	- Voila! But there was a little bit of magic here - what step did I skip? (discuss; lead students to realize that the VTEP on host1 doesn't apriori know anything about what host C2 lives on; routing tables need to be syncronized)
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Multi-Host Control Plane Gossip Network</h2>
+    <img style='max-width: 80%' src='images/gossip.png'></img>
+    <p>All swarm workers participate in a gossip network to update each other's network control planes.</p>
+    <aside class="notes">
+    	- In order for multi-host networking to function, every host needs to know where every container is in an up to date routing table.
+    	- The number of connections blows up like n^2 - not good if we want our networks to scale nicely.
+    	- All worker nodes therefore participate in a gossip network to syncronize control planes.
+    	- Every communication transmits state to exactly 3 peers, reaching eventual consistency
+    	- slow full node replication to resolve inconsistencies
+    	- network topology aware to pick peers with low latency
+    	- all inter-node communication TLS encrypted by default
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Overlay Network Internal Arch</h2>
+    <img style='max-height: 80%; float: left;' src='images/overlayarch.png'></img>
+    <p style='float:right;'>In addition to the overlay network itself, all hosts participating in a multi-host network have exactly one bridge called docker_gwbridge, for egress traffic.</p>
+    <aside class="notes">
+    	- everything we've talked about so far happens on this overlay network; but under the hood, there's actually a second bridge per host called `docker_gwbridge`, which facilitates container egress traffic; container-to-container communication is blocked on this bridge
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Overlay Network Demo</h2>
+    <p>Try setting up your own overlay network with one container plugged in, and investigate the network structure from inside the container:</p>
+    <pre>
+    	host> docker network create -d overlay ovnet
+    	host> docker service create --network ovnet --name container nginx
+    	host> docker exec -it container ifconfig
+    </pre>
+    <aside class="notes">
+    	 - ifconfig shows the network connections from the perspective of the nginx service; the overlay network is the eth connection with ip 10.x.y.z, and the gwbridge should be 172.x.y.z.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Physical Networks</h2>
+    <p>Notice the none of the preceeding discussion relied on:</p>
+    <ul>
+    	<li>Multicast</li>
+    	<li>External key/value store</li>
+    	<li>Specific routing protocols</li>
+    	<li>Specific network topology</li>
+    </ul>
+    <aside class="notes">
+    	 - We've seen bridge and overlay networks; there are more built in network drivers and you can even roll your own, but bridge and overlay are your real workhorses.
+    	 - We advertised at the beginning that a key priority for Docker networks, like all Docker products, is portability across network infrastructure. Note all the things you DON'T need to make any of this work. Almost everything Docker core drivers need to work are part of the Linux kernel - and everything else is baked into Engine.
+    	 - Multicast has scaling problems at enterprise-sized deployments; gossip dodges that bullet; old hands at Docker remember when multi-host networks needed an external KV, but we've baked that right into Engine as of 1.12; and Docker glides right past any routing protocol or network topology you like thanks to linux bridges on the host and vxlan wrappers across the L3 network.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Service Discovery</h2>
+    <img style='max-width: 80%' src='images/DNS.png'></img>
+    <aside class="notes">
+    	- We've seen Docker network service discovery in action already when we tried pinging one container from another, but this diagram lays it out in a litte more explicit detail.
+    	- Every instance of Docker Engine, and therefore every host, has an internal DNS server that containers forward DNS lookups to. This DNS server is one of the things that the multi-host gossip network keeps synced across hosts.
+    	- In the figure, the task1 container fires off a couple of curls; all DNS lookups proceed to the container's 127.0.0.11:53 to begin with. The curl to docker.com isn't listed as a container or a service in the Engine's DNS table, so it gets forwarded to the external DNS and the wide world.
+    	- The curl to myservice, however, hits an entry in the Engine's DNS table, which returns the local subnet address that the container can be found at, and reached via the linux bridge on this host (or the vxlan connection to a different host, if this was a multi-host setup).
+    	- Also note that looking up containers by service name is automatically load-balanced; traffic to the virtual IP 10.0.0.3 will get split among the actual service containers at 10.0.0.4 and 10.0.0.5 via the IP virtual server (IPVS), once again built off of the native linux kernel device. It's also possible to configure a service to lookup in DNS round robin mode, where the containers' actual IPs will be returned directly, rotating through the list in RR fashion.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Service Discovery</h2>
+    <img style='max-width: 80%' src='images/DNS.png'></img>
+    <p>Set up a configuration that matches the diagram. Fire off some curls from client to myservice, and observe the load balancing in action.</p>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>External Load Balancing</h2>
+    <pre>
+   		#Create a service with two replicas and export port 8000 on the cluster
+		$ docker service create --name app --replicas 2 --network appnet -p 8000:80 nginx
+    </pre>
+    <img style='max-width: 80%' src='images/routing-mesh.png'></img>
+    <aside class="notes">
+    	- We've seen internal load balancing in the last couple of slides; Engine's DNS will return a virtual IP that the per-host IPVS knows how to balance across.
+    	- Similarly in a multi-host network, Engine 1.12 has introduced automatic load balancing for ingress traffic. When standing up a service with Swarm, the `-publish` flag publishes a service to a given port on *every* host in the cluster - whether that particular host is running the service or not.
+    	- When traffic is directed to this port, the particular host's IPVS will redistribute it to a node with a helathy instance of that service as per the internal load balancing.
+    	- All these redirects happen over a dedicated overlay network called `ingress`.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: External Load Balancing</h2>
+    <pre>
+   		#Create a service with two replicas and export port 8000 on the cluster
+		$ docker service create --name app --replicas 2 --network appnet -p 8000:80 nginx
+    </pre>
+    <img style='max-width: 80%' src='images/routing-mesh.png'></img>
+    <p>Set up a configuration that matches the diagram. Visit the nginx service from each IP, and observe the external load balancing.</p>
     <aside class="notes">
 
     </aside>
