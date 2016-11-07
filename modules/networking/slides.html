@@ -68,9 +68,9 @@
     	</ul>
     </div>
     <aside class="notes">
-    	- simplest nontrivial network is the Bridge network
-    	- uses a linux bridge as the CNM's network (linux bridges are a virtualization of a network switch, providing level 2 routing via MAC address)
-    	- (walk through birth of bridgenet)
+    	- simplest nontrivial network is the Bridge network<br>
+    	- uses a linux bridge as the CNM's network (linux bridges are a virtualization of a network switch, providing level 2 routing via MAC address)<br>
+    	- (walk through birth of bridgenet)<br>
     	- note that for linux networking fans, there's nothing actually new here: a linux bridge is plugged into a network namespace via a veth; in some sense, container networking IS linux networking.
     </aside>
 </section>
@@ -81,15 +81,16 @@
     <pre>
     	host> docker run -it --name c1 busybox sh
     	c1> ip address   # look for eth0; compare MAC to IP
-    	host> brctrl show
+    	host> sudo apt-get install bridge-utils
+    	host> brctl show
     	c1> route -n
     	host> route -n
     </pre>
     <aside class="notes">
-    	 - start by standing up any old container with no network specifics defined at all
-    	 - note the container MAC addresses are just encodings of their IP, to avoid collisions.
-    	 - docker always sets up a default network called `bridge`, which consists of a linux bridge called `docker0`. By default, all new containers are plugged into their host's `docker0` bridge, so they can talk to each other.
-    	 - back inside the container, we can see traffic is directed to eth0, and thus externally down the veth and to the bridge. 
+    	 - start by standing up any old container with no network specifics defined at all<br>
+    	 - note the container MAC addresses are just encodings of their IP, to avoid collisions.<br>
+    	 - docker always sets up a default network called `bridge`, which consists of a linux bridge called `docker0`. By default, all new containers are plugged into their host's `docker0` bridge, so they can talk to each other.<br>
+    	 - back inside the container, we can see traffic is directed to eth0, and thus externally down the veth and to the bridge.<br> 
     	 - additionally, `docker0` appears as a device on the host's routing table.
     </aside>
 </section>
@@ -106,11 +107,11 @@
     	host> ip link	
     </pre>
     <aside class="notes">
-    	 - start by creating a simple bridge network
-    	 - stand up a container on your network, with no other specifics
-    	 - stand up another container with a user-defined ip
-    	 - your new bridge has two veths plugged into it, one for each container
-    	 - note the default network ID matches the bridge name.
+    	 - start by creating a simple bridge network<br>
+    	 - stand up a container on your network, with no other specifics<br>
+    	 - stand up another container with a user-defined ip<br>
+    	 - your new bridge has two veths plugged into it, one for each container<br>
+    	 - note the default network ID matches the bridge name.<br>
     	 - all Docker has done is stand up a bunch of linux devices
     </aside>
 </section>
@@ -120,8 +121,8 @@
     <img style='max-width: 80%' src='images/bridge2.png'></img>
     <p>Note that bridge networks are firewalled by default.</p>
     <aside class="notes">
-    	- here's the setup you built over the last two demos.
-    	- one key feature of bridge networks and most docker networks is that containers can communicate across their namespaces via their shared linux bridge if they're on the same network, but are firewalled against containers on different networks by the iptables config of each bridge.
+    	- here's the setup you built over the last two demos.<br>
+    	- one key feature of bridge networks and most docker networks is that they are firewalled from other networks by default. Containers can communicate across their namespaces via their shared linux bridges on the same network, but are isolated from each other otherwise.
     </aside>
 </section>
 
@@ -130,8 +131,8 @@
     <img style='max-width: 80%' src='images/nat.png'></img>
     <p>Bridge networks are not exposed on the external network, but containers can be port mapped.</p>
     <aside class="notes">
-    	- in addition to firewalling against other networks, bridge networks are not accessible by default from the external network; containers have IPs assigned to them from the bridge's subnet, and that's it.
-    	- containers are allowed by default to send egress traffic along a random port mapping, and receive a response along the same.
+    	- in addition to firewalling against other networks, bridge networks are not accessible by default from the external network; containers have IPs assigned to them from the bridge's subnet, and that's it.<br>
+    	- containers are allowed by default to send egress traffic along a random port mapping, and receive a response along the same.<br>
     	- ports can also be explicitly mapped from container to host via a --publish directive at the cli, mappings in a Dockerfile or Compose file, or via UCP.
     </aside>
 </section>
@@ -140,14 +141,16 @@
     <h2>Exercise: Container Reachability</h2>
     <ul>
     	<li>From container c3 that you created in the demo, try <pre>ping c2</pre></li>
-    	<li>Also from c3, try <pre>nslookup c2</pre>; do the results make sense? Discuss with the people sitting near you.</li>
+    	<li>Also from c3, try <pre>nslookup c2</pre>; do the results make sense?</li>
+    	<li>Try the same operations to or from c1; discuss with the people sitting near you.</li>
     </ul>
     <aside class="notes">
-
+    	- docker exec c3 ping c2 <br>
+    	- docker exec c3 nslookup c2<br>
     </aside>
 </section>
 
-<section data-background="#1AAAF8" class="blue_bg">
+<!--section data-background="#1AAAF8" class="blue_bg">
     <h2>Exercise: Network Aliasing</h2>
     <p>Discuss each step with your neighbours; try to explain the results you get to each other.</p>
     <ul>
@@ -166,7 +169,7 @@
     <aside class="notes">
 
     </aside>
-</section>
+</section-->
 
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>Multi-Host Networking</h2>
@@ -180,10 +183,11 @@
     <h2>VXLAN Packet Walk</h2>
     <img style='max-width: 80%' src='images/packetwalk.png'></img>
     <aside class="notes">
-    	 - c1 does a DNS lookup for c2. Since both containers are on the same overlay network the Docker Engine local DNS server resolves c2 to its overlay IP address 10.0.0.3.
-    	 - We do these communications with linux bridges, so c1 generates an L2 frame destined for the MAC address of c2.
-    	 - The frame is encapsulated with a VXLAN header by the overlay network driver. The distributed overlay control plane manages the locations and state of each VXLAN tunnel endpoint so it knows that c2 resides on host-B at the physical address of 192.168.0.3. That address becomes the destination address of the underlay IP header.
-    	 - Once encapsulated the packet is sent across the physical network.
+    	 - We can achieve this via virtual extensible LAN, or VXLAN. VXLAN is an encapsulation standard that takes L2 communications and wraps them in headers that allow their transport over the L3 network, which is exactly what this figure is trying to illustrate.<br>
+    	 - c1 does a DNS lookup for c2. Since both containers are on the same overlay network the Docker Engine local DNS server resolves c2 to its overlay IP address 10.0.0.3.<br>
+    	 - We do these communications with linux bridges, so c1 generates an L2 frame destined for the MAC address of c2.<br>
+    	 - The frame is encapsulated with a VXLAN header by the overlay network driver. The distributed overlay control plane knows that c2 resides on host-B at the physical address of 192.168.0.3.<br>
+    	 - Once encapsulated the packet is sent across the physical network.<br>
     	 - The packet arrives at the eth0 interface of host-B and is decapsulated by the overlay network driver. The original L2 frame from c1 is passed to the c2's eth0 interface and up to the listening application.
     </aside>
 </section>
@@ -192,14 +196,14 @@
     <h2>VXLAN Packet Walk</h2>
     <img style='max-width: 80%' src='images/packetwalk-nigel.png'></img>
     <aside class="notes">
-    	- In a little more detail, overlay networks share a lot of the plumbing as bridge networks. Containers still have a veth plugging them into a linux bridge; what's new here is the VXLAN Tunnel Endpoint (VTEP) hanging out on each host; these are the devices responsible for doing the wrapping and unwrapping illustrated previously.
-    	- Let's walk through C1 trying to ping C2 in the figure:
-    	- C1 does its DNS lookup for C2, and finds its IP of 10.0.0.4
-    	- packet goes to the linux bridge, as usual
-    	- the first time, the linux bridge won't have an entry for the MAC address of C2, so it floods all ports with the packet.
-    	- the VTEP catches this and responds with its own MAC address - now the bridge will send all such traffic to the VTEP
-    	- the VTEP on node1 encapsulates the ping with the headers it needs to traverse the physical network and arrive at UDP port 4789.
-    	- the VTEP on node2 decapsulates the ping and sends it to the local linux bridge, which recognizes C2's MAC address and delivers the packet.
+    	- In a little more detail, overlay networks share a lot of the plumbing as bridge networks. Containers still have a veth plugging them into a linux bridge; what's new here is the VXLAN Tunnel Endpoint (VTEP) hanging out on each host; these are the devices responsible for doing the wrapping and unwrapping illustrated previously.<br>
+    	- Let's walk through C1 trying to ping C2 in the figure:<br>
+    	- C1 does its DNS lookup for C2, and finds its IP of 10.0.0.4<br>
+    	- packet goes to the linux bridge, as usual<br>
+    	- the first time, the linux bridge won't have an entry for the MAC address of C2, so it floods all ports with the packet.<br>
+    	- the VTEP catches this and responds with its own MAC address - now the bridge will send all such traffic to the VTEP<br>
+    	- the VTEP on node1 encapsulates the ping with the headers it needs to traverse the physical network and arrive at UDP port 4789.<br>
+    	- the VTEP on node2 decapsulates the ping and sends it to the local linux bridge, which recognizes C2's MAC address and delivers the packet.<br>
     	- Voila! But there was a little bit of magic here - what step did I skip? (discuss; lead students to realize that the VTEP on host1 doesn't apriori know anything about what host C2 lives on; routing tables need to be syncronized)
     </aside>
 </section>
@@ -209,13 +213,13 @@
     <img style='max-width: 80%' src='images/gossip.png'></img>
     <p>All swarm workers participate in a gossip network to update each other's network control planes.</p>
     <aside class="notes">
-    	- In order for multi-host networking to function, every host needs to know where every container is in an up to date routing table.
-    	- The number of connections blows up like n^2 - not good if we want our networks to scale nicely.
-    	- All worker nodes therefore participate in a gossip network to syncronize control planes.
-    	- Every communication transmits state to exactly 3 peers, reaching eventual consistency
-    	- slow full node replication to resolve inconsistencies
-    	- network topology aware to pick peers with low latency
-    	- all inter-node communication TLS encrypted by default
+    	- In order for multi-host networking to function, every host needs to know where every container is in an up to date routing table.<br>
+    	- The number of connections blows up like n^2 - not good if we want our networks to scale nicely.<br>
+    	- All worker nodes therefore participate in a gossip network to syncronize control planes.<br>
+    	- Every communication transmits state to exactly 3 peers, reaching eventual consistency<br>
+    	- slow full node replication to resolve inconsistencies<br>
+    	- network topology aware to pick peers with low latency<br>
+    	- all inter-node control-plane communication TLS encrypted by default<br>
     </aside>
 </section>
 
@@ -251,8 +255,8 @@
     	<li>Specific network topology</li>
     </ul>
     <aside class="notes">
-    	 - We've seen bridge and overlay networks; there are more built in network drivers and you can even roll your own, but bridge and overlay are your real workhorses.
-    	 - We advertised at the beginning that a key priority for Docker networks, like all Docker products, is portability across network infrastructure. Note all the things you DON'T need to make any of this work. Almost everything Docker core drivers need to work are part of the Linux kernel - and everything else is baked into Engine.
+    	 - We've seen bridge and overlay networks; there are more built in network drivers and you can even roll your own, but bridge and overlay are your real workhorses. If you've used Compose before, you've seen a bridge network in action; if you've used Swarm, that was an overlay network under the hood.<br>
+    	 - We advertised at the beginning that a key priority for Docker networks, like all Docker products, is portability across network infrastructure. Note all the things you DON'T need to make any of this work. Almost everything Docker core drivers need to work are part of the Linux kernel - and everything else is baked into Engine.<br>
     	 - Multicast has scaling problems at enterprise-sized deployments; gossip dodges that bullet; old hands at Docker remember when multi-host networks needed an external KV, but we've baked that right into Engine as of 1.12; and Docker glides right past any routing protocol or network topology you like thanks to linux bridges on the host and vxlan wrappers across the L3 network.
     </aside>
 </section>
@@ -261,10 +265,10 @@
     <h2>Service Discovery</h2>
     <img style='max-width: 80%' src='images/DNS.png'></img>
     <aside class="notes">
-    	- We've seen Docker network service discovery in action already when we tried pinging one container from another, but this diagram lays it out in a litte more explicit detail.
-    	- Every instance of Docker Engine, and therefore every host, has an internal DNS server that containers forward DNS lookups to. This DNS server is one of the things that the multi-host gossip network keeps synced across hosts.
-    	- In the figure, the task1 container fires off a couple of curls; all DNS lookups proceed to the container's 127.0.0.11:53 to begin with. The curl to docker.com isn't listed as a container or a service in the Engine's DNS table, so it gets forwarded to the external DNS and the wide world.
-    	- The curl to myservice, however, hits an entry in the Engine's DNS table, which returns the local subnet address that the container can be found at, and reached via the linux bridge on this host (or the vxlan connection to a different host, if this was a multi-host setup).
+    	- We've seen Docker network service discovery in action already when we tried pinging one container from another, but this diagram lays it out in a litte more explicit detail.<br>
+    	- Every instance of Docker Engine, and therefore every host, has an internal DNS server that containers forward DNS lookups to. This DNS server is one of the things that the multi-host gossip network keeps synced across hosts.<br>
+    	- In the figure, the task1 container fires off a couple of curls; all DNS lookups proceed to the container's 127.0.0.11:53 to begin with. The curl to docker.com isn't listed as a container or a service in the Engine's DNS table, so it gets forwarded to the external DNS and the wide world.<br>
+    	- The curl to myservice, however, hits an entry in the Engine's DNS table, which returns the local subnet address that the container can be found at, and reached via the linux bridge on this host (or the vxlan connection to a different host, if this was a multi-host setup).<br>
     	- Also note that looking up containers by service name is automatically load-balanced; traffic to the virtual IP 10.0.0.3 will get split among the actual service containers at 10.0.0.4 and 10.0.0.5 via the IP virtual server (IPVS), once again built off of the native linux kernel device. It's also possible to configure a service to lookup in DNS round robin mode, where the containers' actual IPs will be returned directly, rotating through the list in RR fashion.
     </aside>
 </section>
@@ -286,9 +290,9 @@
     </pre>
     <img style='max-width: 80%' src='images/routing-mesh.png'></img>
     <aside class="notes">
-    	- We've seen internal load balancing in the last couple of slides; Engine's DNS will return a virtual IP that the per-host IPVS knows how to balance across.
-    	- Similarly in a multi-host network, Engine 1.12 has introduced automatic load balancing for ingress traffic. When standing up a service with Swarm, the `-publish` flag publishes a service to a given port on *every* host in the cluster - whether that particular host is running the service or not.
-    	- When traffic is directed to this port, the particular host's IPVS will redistribute it to a node with a helathy instance of that service as per the internal load balancing.
+    	- We've seen internal load balancing in the last couple of slides; Engine's DNS will return a virtual IP that the per-host IPVS knows how to balance across.<br>
+    	- Similarly in a multi-host network, Engine 1.12 has introduced automatic load balancing for ingress traffic. When standing up a service with Swarm, the `-publish` flag publishes a service to a given port on *every* host in the cluster - whether that particular host is running the service or not.<br>
+    	- When traffic is directed to this port, the particular host's IPVS will redistribute it to a node with a helathy instance of that service as per the internal load balancing.<br>
     	- All these redirects happen over a dedicated overlay network called `ingress`.
     </aside>
 </section>
@@ -313,7 +317,7 @@
     </pre>
     <img style='max-width: 80%' src='images/ipsec.png'></img>
     <aside class="notes">
-    	- Control plane communications (gossip syncronization and manager->worker task assignment) is always mutually TLS encrypted, absolutely no setup required; data plane encryption can be optionally turned on with this flag.
+    	- Control plane communications (gossip syncronization and manager->worker task assignment) is always mutually TLS encrypted, absolutely no setup required; data plane encryption can be optionally turned on with this flag.<br>
     	- Data plane encryption sticks an IPSec layer in front of the physical network connection on all nodes joined to the Swarm; Swarm managers periodically regenerate keys distributed to all hosts on the overlay network.
     </aside>
 </section>
@@ -328,8 +332,8 @@
     	<li><b>Performance & Scalability</b>: gossip net w/ topology aware communication; service abstraction</li>
     </ul>
     <aside class="notes">
-    	- We started out by discussing our priorities for container networks: portability, service discovery, load balancing, security, performance and scalability.
-    	- We walked through the two big workhorses of container networking, bridge and overlay networks, and followed packets around both, and in so doing investigated the specific strategies Docker uses to deliver on these priorities (discuss).
+    	- We started out by discussing our priorities for container networks: portability, service discovery, load balancing, security, performance and scalability.<br>
+    	- We walked through the two big workhorses of container networking, bridge and overlay networks, and followed packets around both, and in so doing investigated the specific strategies Docker uses to deliver on these priorities (discuss).<br>
     	- Above all, the take home lesson from all this is that Docker networking heavily leverages the battle-tested networking features of the linux kernel - bridges, vxlan, iptables, veth, network namespaces, along with the high-level abstraction of the container networking model, to build networks that can be smoothly and automatically deployed and scaled on any infrastructure.
     </aside>
 </section>
