@@ -1,0 +1,537 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+	<h2>Docker Volumes</h2>
+	<aside class="notes"></aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Module Objectives</h2>
+    <ul>
+      <li>Explain what volumes are and what they are used for</li>
+      <li>Learn the different methods of mounting a volume in a container</li>
+      <li>Explain how data containers work</li>
+      <li>Create some data containers</li>
+    </ul>  
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Volumes</h2>
+    <p>A <b>volume</b> is a designated directory in a container, which is designed to persist data, independent of the container’s life cycle</p>
+    <ul>
+      <li>Volume changes are excluded when updating an image by any means.</li>
+      <li>Persist when a container is deleted</li>
+      <li>Can be mapped to a host folder</li>
+      <li>Can be shared between containers</li>
+    </ul>  
+    <aside class="notes">
+		- Typical uses are for logfile or database persistence and sharing.
+		- In technical detail, the key thing to understand about volumes is that they are external to the union file system that docker uses to build images. Volume changes do not affect image commits or images constructed by Dockerfiles - volumes bypass the copy-on-write strategy image creation usually follows, so no new filesystem layers are created by those changes.
+		- It’s possible to mount a host folder as a volume; this is nice for testing rapidly changing code in the container’s environment, but impedes portability.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker `volume` command</h2>
+    <p>The docker `volume` command contains a number of sub commands used to create and manage volumes:</p>
+    <pre>
+		docker volume create --name demo
+		docker volume ls
+		docker volume inspect demo
+		docker volume rm demo
+    </pre>
+    <aside class="notes">
+		- (live demo as per slide)
+		- note that omitting the --name flag results in a randomly generated name
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Mount a volume</h2>
+    <ul>
+    	<li>Volumes can be mounted when running a container</li>
+    	<li>
+    		Use the -v option on `docker run` command and specify the name of the volume and the mount path<br>
+    		syntax: `docker run -v <name>:<path> …`
+    	</li>
+    	<li>Path is the container folder where you want to mount the volume</li>
+    </ul>
+    <pre>
+		# Execute a new container and mount the volume test1 in the folder /www/test1
+		docker run -it -v test1:/www/test1 ubuntu:14.04 bash
+    </pre>
+    <aside class="notes">
+		- Demo creating a volume as per the above, add a file to the volume, then leave the container, spin up the same but debian (just to emphasize this is definitely a completely different file system), and show the unchanged contents of the volume.
+		- Multiple volumes can be mounted with multiple ‘-v host:container’ flags in ‘docker run...’
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Create & Mount a Volume</h2>
+    <pre>
+    	# 1. Create a volume called test1:
+    	> docker volume create --name test1
+
+    	# 2. Run docker volume ls and verify that you can see your test1 volume
+    	
+    	# 3. Execute a new Ubuntu container and mount the test1 volume. Map it to the path /www/website and run bash as your process:
+    	> docker run -it -v test1:/www/website ubuntu:14.04 bash
+
+    	# 4. Inside the container, verify that you can get to /www/website:
+		> cd /www/website
+
+		# 5. Create a file called test.txt inside the /www/website folder:
+		> touch test.txt
+
+		# 6. Exit the container without stopping it by hitting CTRL + P + Q
+
+		# 7. Commit the updated container as a new image called test and tag it as 1.0:
+		> docker commit <container ID> test:1.0
+
+		# 8. Execute a new container with your test image and go into it’s bash shell
+		> docker run -it test:1.0 bash
+
+		# 9. Verify that the /www/website folder exists and that there are no files inside, and exit the container.
+
+		# 10. Run docker ps to ensure that your first container is still running.
+    </pre>
+    <aside class="notes">
+		- So, we saw together that volume content is persisted and available when mounting the volume into new containers - but creating new images from a container with a mounted volume doesn’t carry the volume contents along with it.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Where are our volumes?</h2>
+    <ul>
+    	<li>Volumes exist independently from containers</li>
+    	<li>If a container is stopped, we can still access our volume</li>
+    	<li>To find where the volume is use `docker inspect` on the container and look for the “source” field as shown below:</li>
+    </ul>
+    <img src='images/docker-inspect-json.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker volume inspect command</h2>
+    <ul>
+    	<li>The `docker volume inspect` command shows all the information about a specified volume</li>
+    	<li>Information includes the “Mountpoint” which tells us where the volume is located on the host</li>
+    </ul>
+    <img src='images/volume-inspect.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Find your volume</h2>
+    <pre>
+    	# 1. Run `docker volume inspect` on the test1 volume:
+    	> docker volume inspect test1
+
+    	# 2. Copy the path specified by the Mountpoint field. The path should be /var/lib/docker/volumes/test1/_data
+    	
+    	# 3. Elevate your user privileges to root:
+    	> sudo su
+
+    	# 4. Change directory into the volume path in step 2:
+		> cd /var/lib/docker/volumes/test1/_data
+
+		# 5. Run `ls` and verify you can see the `test.txt` file
+
+		# 6. Create another file called `test2.text`:
+		> touch test2.txt
+
+		# 7. Exit the superuser account:
+		> exit
+
+		# 8. Use `docker exec` to log back into the shell of your Ubuntu container that is still running
+		> docker exec -it <container name> bash
+
+		# 9. Change directory into the `/www/website` folder. 
+
+		# 10. Verify that you can see both the `test.txt` and `test2.txt` files
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Deleting a volume</h2>
+    <ul>
+    	<li>Volumes are not deleted when you delete a container</li>
+    	<li>Use the `docker volume rm` command to delete a volume</li>
+    	<li>Can also use the -v option in the `docker rm` command to delete all the volumes associated with the container when deleting the container itself</li>
+    </ul>
+    <pre>
+		# Delete the volume called test1
+		> docker volume rm test1
+		# Delete a container and remove it’s associated volumes
+		> docker rm -v <container ID> 
+    </pre>
+    <aside class="notes">
+    	- we saw ‘volume rm’ already, but we can also kill off all volumes associated with a container along with the container with the -v flag to ‘docker rm’.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Deleting Volumes</h2>
+    <ul>
+    	<li>You cannot delete a volume if it is being used by a container; doesn’t matter if the container is running or stopped</li>
+    	<li>Must delete all containers first</li>
+    	<li>`docker rm -v` command will not delete a volume associated with the container if that volume is mounted in another container</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Deleting Volumes</h2>
+    <pre>
+    	# 1. Delete the container from exercise 8.1 without using any options :
+    	> docker rm <container ID>
+
+    	# 2. Run `docker volume ls` and check the result 
+    	
+    	# 3. Notice our `test1` volume is still present
+
+    	# 4. Elevate your user privaleges:
+		> sudo su
+
+		# 5. Change directory to the volume path and check to see that the `test.txt` and `test2.txt` files are still present
+		> cd /var/lib/docker/volumes/test1/_data
+		> ls
+
+		# 6. Exit superuser:
+		> exit
+
+		# 7. Delete the test1 volume:
+		> docker volume rm test1
+
+		# 8. Run `docker volume ls` and make sure the test1 volume is no longer displayed.
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Mounting host folders to a volume</h2>
+    <ul>
+    	<li>When running a container, you can map folders on the host to a volume</li>
+    	<li>The files from the host folder will be present in the volume</li>
+    	<li>Changes made on the host are reflected inside the container volume</li>
+    	<li>Syntax: `docker run -v [host path]:[container path]:[rw|ro]`</li>
+    	<li>`rw` or `ro` controls the write status of the volume</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Simple Example</h2>
+    <ul>
+    	<li>In the example below, files inside `/home/user/public_html` on the hosts will appear in the `/data/www` folder of the container</li>
+    	<li>If the host path or container path does not exist, it will be created</li>
+    	<li>If the container path is a folder with existing content, the files will be replaced by those from the host path</li>
+    	<pre>
+    		# Mount the contents of the public_html folder on the hosts to the container volume at /data/www
+			> docker run –d -v /home/user/public_html:/data/www ubuntu
+    	</pre>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Inspecting the mapped volume</h2>
+    <p>The Mounts field from `docker inspect` will show the container volume being mapped to the host path specified during `docker run`:</p>
+    <img src='images/mapped-volume.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Mounting Directories</h2>
+    <pre>
+    	# 1. On your host, make a directory called ‘demo’ and add a file to it: 
+    	host> mkdir demo
+    	host> touch demo/file1.dat
+
+    	# 2. Mount ‘demo’ in a container:
+    	> docker run -it -v demo:/www/demo ubuntu:14.04 bash
+    	
+    	# 3. In the container, ‘ls’ the ‘/www/demo’ directory. Do you see ‘file1.dat’?
+
+    	# 4. Add another file to ‘/www/demo’ from within the container:
+		container> touch /www/demo/file2.dat
+
+		# 5. Exit the container. What is in the ‘demo’ directory you made in step 1? Where are file1.dat and file2.dat?
+
+		# 6. Modify file1.dat on your host, run the container as above, and verify that the changes appear inside the container.
+    </pre>
+    <aside class="notes">
+    	- The point being, absolute paths mount directories, non-absolute paths create volumes. How would you actually mount the /demo directory you made in step 1? 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>A data persistence example with NGINX</h2>
+    <ul>
+    	<li>Let’s run an NGINX container and have it serve web pages that we have on the host machine</li>
+    	<li>That way we can conveniently edit the page on the host instead of having to make changes inside the container</li>
+    	<li>Mount a volume to the NGINX folder where logs are written to. This way we can persist the log files</li>
+    	<li>
+    		Quick NGINX 101:
+		    <ul>
+		    	<li>NGINX starts with a one default server on port 80</li>
+		    	<li>Default location for pages is the `/usr/share/nginx/html` folder</li>
+		    	<li>By default the folder has an index.html file which is the welcome page</li>
+		    	<li>Log files are written to the `/var/log/nginx` folder</li>
+		    </ul>
+    	</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Quick note</h2>
+    <ul>
+    	<li>Nginx has two main log files: Error log and Access log </li>
+    	<li>The official nginx image writes the error log file to STDERR and the access log to STDOUT</li>
+    	<li>Logs are viewable with a `docker logs` command </li>
+    	<li>Our exercise will use a customized nginx image that writes the error and access log to the standard log files inside `/var/log/nginx`</li>
+    	<li>Customized image is `trainingteam/nginx`</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Diagram of example</h2>
+    <img src='images/nginx-example.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Run nginx container</h2>
+    <pre>
+    	# 1. Create a volume called nginx_logs: 
+    	host> docker volume create --name nginx_logs
+
+    	# 2. Run the custom `trainingteam/nginx` container and map your public_html folder to a volume at `/usr/share/nginx/html`. Also mount your nginx_logs volume to the `/var/log/nginx` folder. Name the container nginx_server:
+    	host> 	docker run -d -P --name nginx_server \
+    			-v ~/public_html:/usr/share/nginx/html \
+   	 			-v nginx_logs:/var/log/nginx \
+    			trainingteam/nginx
+    	
+    	# 3. Get terminal access to your container
+    	> docker exec -it nginx_server bash 
+
+    	# 4. Put some text into `/usr/share/nginx/html/index.html` folder, and then exit the terminal.
+
+		# 5. Run `docker ps` to find the host port which is mapped to port 80 on the container.
+
+		# 6. On your browser, access your AWS server URL and specify the port from question 5).
+
+		# 7. Verify you can see the contents of your index.html file from your public_html folder.
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Check log persistence</h2>
+    <pre>
+    	# 1. Get terminal access to your container again: 
+    	host> docker exec -it nginx_server bash
+
+    	# 2. Change directory to /var/log/nginx:
+    	container> cd /var/log/nginx
+    	
+    	# 3. Check that you can see the access.log and error.log files
+
+    	# 4. Run `tail -f access.log`, refresh your browser a few times and observe the log entries being written to the file
+
+		# 5. Exit the container terminal
+
+		# 6. Run docker volume inspect nginx_logs and copy the path indicated by the Mountpoint field (Path should be `/var/lib/docker/volumes/nginx_logs/_data`).
+
+		# 7. Elevate user priveleges 
+		> sudo su
+
+		# 8. Change directory into the volume path
+		> cd /var/lib/docker/volumes/nginx_logs/_data
+
+		# 9. Check for the presence of the access.log and error.log file
+
+		# 10. Run tail -f access.log, refresh your browser a few times in order to make some requests to the NGINX server
+
+		# 11. Observe log entries being written into the access.log file 
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Use cases for mounting host directories</h2>
+    <ul>
+    	<li>You want to manage storage and snapshots yourself. (With LVM, or a SAN, or ZFS, or anything else!)</li>
+    	<li>You have a separate disk with better performance (SSD) or resiliency (EBS) than the system disk, and you want to put important data on that disk.</li>
+    	<li>You want to share your source directory between your host (where the source gets edited) and the container (where it is compiled or executed). Good for testing purposes but not for production deployment.</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Sharing data between containers</h2>
+    <ul>
+    	<li>Volumes can be mounted into multiple containers</li>
+    	<li>Allows data to be shared between containers</li>
+    	<li>
+    		Example use cases
+		    <ul>
+		    	<li>One container writes metric data to the volume</li>
+		    	<li>Another container runs an application to read the data and generate graphs</li>
+		    </ul>
+    	</li>
+    	<li>Note: Be aware of potential conflicts if multiple applications are allowed write access into the same volume</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Extending our nginx example</h2>
+    <img src='images/nginx-example-2.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Sharing Volumes</h2>
+    <pre>
+    	# 1. Run `docker ps` and make sure that your nginx_server container from the last exercise is still running.
+
+    	# 2. Run an Ubuntu container and mount the nginx_logs volume to the folder /data/mylogs as read only. Run bash as your process.
+    	host> 	docker run -it \
+    			-v nginx_logs:/data/mylogs:ro \
+    			ubuntu:14.04 bash
+    	
+    	# 3. On your container terminal, change directory to `/data/mylogs`
+
+    	# 4. Confirm that you can see the access.log and error.log files
+
+		# 5. Try and create a new file called text.txt
+		container> touch test.txt
+
+		# 6. Notice how it fails because we mounted the volume as read only
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Volumes in dockerfile</h2>
+    <ul>
+    	<li>VOLUME instruction creates a mount point</li>
+    	<li>Can specify arguments in a JSON array or string</li>
+    	<li>Cannot map volumes to host directories</li>
+    	<li>Volumes are initialized when the container is executed</li>
+    </ul>
+    <pre>
+		# String example
+		VOLUME /myvol
+
+		# String example with multiple volumes
+		VOLUME /www/website1.com /www/website2.com
+
+		# JSON example
+		VOLUME [“myvol”, “myvol2”]
+    </pre>
+    <aside class="notes">
+	- You can also specify volumes in a dockerfile by using the Volume instruction. This way when you run a container from the image that you’ve built you don’t have to specify the –v option on the run command. The instruction is straightforward. It’s just volume, followed by the folder where you want to mount. You can specify multiple folders.
+	- With this method, you cannot map volumes to host directories. Because a Dockerfile is designed so that you can build you image on any host machine, there’s no guarantee that host directory you specify will actually exist when you build an image from the Dockerfile
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Example Dockerfile with volumes</h2>
+    <ul>
+    	<li>When we run a container from this image, the volume will be initialized along with any data in the specified location</li>
+    	<li>If we want to setup default files in the volume folder, the folder and file must be created first</li>
+    </ul>
+    <pre>
+		FROM ubuntu:14.04
+
+		RUN apt-get update
+		RUN apt-get install -y vim wget
+
+		RUN mkdir /data/myvol -p && echo "hello world" > /data/myvol/testfile
+		VOLUME ["/data/myvol"]
+    </pre>
+    <aside class="notes">
+    	note that on the host, this volume will just have a random name, which you can find via ‘docker inspect <container ID>’
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Volumes defined in images</h2>
+    <ul>
+    	<li>Most images will have volumes defined in their Dockerfile</li>
+    	<li>Can check by using docker inspect command against the image</li>
+    	<li>`docker inspect` can be run against an image or a container</li>
+    	<li>To run against an image, specify either the image repository and tag or the image id.</li>
+    </ul>
+    <pre>
+		# Inspect the properties of the ubuntu:14.04 image
+		> docker inspect ubuntu:14.04
+		# OR
+		> docker inspect <image id>
+    </pre>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Inspecting an image for volumes</h2>
+    <img src='images/image-volumes.png'></img>
+    <aside class="notes">
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Module summary</h2>
+    <ul>
+    	<li>Volumes are created with the `docker volume create` command</li>
+    	<li>Volumes can be mounted when we run a container during the docker run command or in a Dockerfile</li>
+    	<li>Volumes bypass the copy on write system</li>
+    	<li>We can map a host directory to a volume in a container</li>
+    	<li>A volume persists even after its container has been deleted</li>
+    </ul>
+    <aside class="notes">
+
+    </aside>
+</section>
