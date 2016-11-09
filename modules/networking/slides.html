@@ -99,7 +99,7 @@
     <h2>User-Defined Bridge Network Demo</h2>
     <p>On the same node as before:</p>
     <pre>
-    	host> docker network create -d bridge my_bridge
+    	host> docker network create -d bridge --subnet 10.0.0.254/16 my_bridge
     	host> docker run -itd --name c2 --net my_bridge busybox sh
     	host> docker run -itd --name c3 --net my_bridge --ip 10.0.0.254 busybox sh
     	host> brctl show
@@ -113,6 +113,8 @@
     	 - your new bridge has two veths plugged into it, one for each container<br>
     	 - note the default network ID matches the bridge name.<br>
     	 - all Docker has done is stand up a bunch of linux devices
+
+         - REMOVE all this stuff after the example; fixed subnet can cause weird collisions.
     </aside>
 </section>
 
@@ -236,12 +238,13 @@
     <h2>Overlay Network Demo</h2>
     <p>Try setting up your own overlay network with one container plugged in, and investigate the network structure from inside the container:</p>
     <pre>
+        host> docker swarm init
     	host> docker network create -d overlay ovnet
-    	host> docker service create --network ovnet --name container nginx
-    	host> docker exec -it container ifconfig
+    	host> docker service create --replicas 1 --network ovnet --name container nginx
+    	host> docker exec -it <container id> ip link
     </pre>
     <aside class="notes">
-    	 - ifconfig shows the network connections from the perspective of the nginx service; the overlay network is the eth connection with ip 10.x.y.z, and the gwbridge should be 172.x.y.z.
+    	 - ip link shows the network connections from the perspective of the nginx service; the overlay network is the eth connection with ip 0a.x.y.z, and the gwbridge should be ac.x.y.z.
     </aside>
 </section>
 
@@ -276,9 +279,14 @@
 <section data-background="#1AAAF8" class="blue_bg">
     <h2>Exercise: Service Discovery</h2>
     <img style='max-width: 80%' src='images/DNS.png'></img>
-    <p>Set up a configuration that matches the diagram. Fire off some curls from client to myservice, and observe the load balancing in action.</p>
+    <p>Set up a configuration of services that matches the diagram; use an `nginx` image for both services. Try installing `host` (apt-get update; apt-get install host) in the `client` container, and doing `host myservice`. Finally, stop the `myservice` service, and restart it with the flag `--endpoint-mode dnsrr`, and query its IP from `client` again.</p>
     <aside class="notes">
-
+         docker service create --replicas 2 --name myservice --network ovnet nginx
+         docker service create --replicas 1 --name client --network ovnet nginx
+         docker exec -it <client container id> /bin/bash
+         apt-get update
+         apt-get install host
+         host myservice
     </aside>
 </section>
 
@@ -304,9 +312,13 @@
 		$ docker service create --name app --replicas 2 --network appnet -p 8000:80 nginx
     </pre>
     <img style='max-width: 80%' src='images/routing-mesh.png'></img>
-    <p>Set up a configuration that matches the diagram. Visit the nginx service from each IP, and observe the external load balancing.</p>
+    <p>Set up a configuration that matches the diagram. Determine which node isn't running an nginx container, and visit port 8000 at its IP.</p>
     <aside class="notes">
-
+        docker swarm init / join two nodes<br>
+        docker network create -d overlay appnet<br>
+        docker service create --name app --replicas 2 --network appnet -p 8000:80 nginx<br>
+        docker service ps app<br>
+        (visit each node.)
     </aside>
 </section>
 
