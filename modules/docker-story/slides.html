@@ -10,8 +10,8 @@
 	<h2>Who's ever been to dependency hell?</h2>   
     <p>(Other circles of hell include scaling hell, deployment hell, and infrastructure hell)</p>
     <aside class="notes">
-    	- Ask a small class to tell stories to the group, or a large class to pair off and tell each other their stories
-    	- then call a couple out for the room.
+    	- Ask a small class to tell stories to the group, or a large class to pair off and tell each other their stories<br>
+    	- then call a couple out for the room.<br>
     </aside>
 </section>
 
@@ -20,8 +20,8 @@
 	<h2>Standardization and Encapsulation.</h2>   
     <p>Luckily, this problem is not new.</p>
     <aside class="notes">
-    	- point out how the class's stories map to standardization and encapsulation problems;
-        - "dependency conflics are like fighting todlers; you have to encapsulate them in different rooms"
+    	- point out how the class's stories map to standardization and encapsulation problems;<br>
+        - "dependency conflics are like fighting toddlers; you have to encapsulate them in different rooms"<br>
     </aside>
 </section>
 
@@ -31,8 +31,8 @@
     	<p>Devops circa 1912</p>
     </div>
     <aside class="notes">
-        - back in the day, shipping cargo was a big problem - here are some 19th century devops struggling to deploy their latest product.
-        - huge delays, breakage and theft were caused by the fact that loose cargo had to be packed and unpacked at ports for redistribution
+        - back in the day, shipping cargo was a big problem - here are some 19th century devops struggling to deploy their latest product.<br>
+        - huge delays, breakage and theft were caused by the fact that loose cargo had to be packed and unpacked at ports for redistribution<br>
     </aside>
 </section>
 
@@ -53,8 +53,128 @@
 	    <p>Encapsulation eliminates friction across infrastructure, and standardization facilitates scale.</p>
     </div>
     <aside class="notes">
-    	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck with far less friction.
-    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically. The history of technology and business is rife with the same pattern...
+    	- the great innovation of shipping containerization was the repacking was no longer necessary, allowing cargo to move from ship to train to truck with far less friction.<br>
+    	- shipping wasn't the only example, either; standardization of replacable parts was a key methodological innovation that allowed the industrial revolution to scale so dramatically. The history of technology and business is rife with the same pattern.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Deployment Nightmare</h2>
+        <img src='images/deployment-nightmare.png' style="background:none !important; height:60%">
+        <p>Each component needs to perform reliably and consistently in each environment; deployment nightmare scales like n<sup>2</sup>.</p>
+    </div>
+    <aside class="notes">
+        - The same story plays itself out in computing: an enterprise application can have dozens of components and need to function properly though a long development, testing and deployment pipeline; each box on this grid can be a tremendous time sink.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Any App, Anywhere</h2>
+        <img src='images/deployment-victory.png' style="background:none !important; height:60%">
+        <p>A tool that abstracts away differences between deployment environments means we can run any app, anywhere.</p>
+    </div>
+    <aside class="notes">
+        - If instead we can encapsulate our software effectively, we only need to get it working once; moving through the pipeline won't break anything, since those changes are abstracted away.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Encapsulation I: Physical Servers</h2>
+        <h3>in the dark ages</h3>
+        <img src='images/physical-server.png' style="background:none !important; height:60%">
+        <p>One application, one physical server</p>
+    </div>
+    <aside class="notes">
+        - So, lets take a trip down memory lane to revisit encapsulation throught the ages in development and deployment of applications.<br>
+        - The simplest possible way to imagine application encapsulation is via the encapsulation you get for free - at the hardware level. If we run one application with it's corresponding dependency stack on each server, then those applications and their stacks can never collide with each other.<br> 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Encapsulation I: Physical Servers</h2>
+        <h3>limits of physical encapsulation</h3>
+        <img src='images/physical-server.png' style="float:left; background:none !important; width:45%">
+        <div style='float:right; width:45%;'>
+            <ul>
+                <li>Slow deployment</li>
+                <li>Huge costs</li>
+                <li>Provisioning speed limited by physical logistics</li>
+                <li>Difficult to scale</li>
+                <li>Dificult to migrate</li>
+                <li>Vendor lock-in</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        - Physical enapsulation of one application per server is really pretty terrible, because it's inefficient on resources and subject to all the limitations of real-world logistics; provisioning a new server cost as much as a server, and could take weeks while that hardware is sourced, installed in the datacenter and brought online.<br>
+        - This also meant that scaling an application couldn't happen in real time.<br>
+        - Futhermore, this doesn't provide any facility for moving apps through a pipeline from development to testing to deployment, which by definition must be on separate hardware.<br>
+        - We needed something that would let us spawn an encapsulated environment programatically, cutting out any need to source or reconfigure any physical hardware.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Encapsulation II: VMs</h2>
+        <img src='images/vms.png' style="float:left; background:none !important; width:45%">
+        <div style='float:right; width:45%;'>
+            <ul>
+                <li>Multiple apps on one server</li>
+                <li>Elastic, real time provisioning</li>
+                <li>Scalable pay-per-use cloud models viable</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        - VMs were of course the next iteration of application encapsulation. Now instead of needing new metal, we could spin up a new server virtually, automatically, and immediately.<br>
+        - Not only is elastic provisioning convenient and agile, it makes pay-as-you-go pricing models in the cloud a viable and attractive option.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Encapsulation II: VMs</h2>
+        <h3>VM Limitations</h3>
+        <img src='images/vms.png' style="float: left; background:none !important; width:45%">
+        <div style='float:right; width:45%;'>
+            <ul>
+                <li>VMs require CPU & memory allocation</li>
+                <li>Massive overhead from guest OS</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        - In some sense, VMs completely delivered on our needs for agile encapsulation. The trouble with them was that they tend to be resource hogs.<br>
+        - Each VM typically would require a fixed CPU and memory allocation whether it was using the resources or not<br>
+        - Each VM carries with it a complete operating system, resulting in a lot of duplication and wasted resources.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <div style='text-align:center'>
+        <h2>Encapsulation III: Containers</h2>
+        <img src='images/containers.png' style="float: left; background:none !important; width:45%">
+        <div style='text-align:left;'>
+            <p>Containers leverage kernel features to create extremely light-weight encapsulation:</p>
+            <div style='float:right; width:45%;'>
+                <ul>
+                    <li>Kernel namespaces</li>
+                    <li>Network namespaces</li>
+                    <li>Linux containers</li>
+                    <li>cgroups & security tools</li>
+                    <li><b>Results in faster spool-up and denser servers</b></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <aside class="notes">
+        - Through the early 2000's a number of linux kernel features landed that made lightweight containerization viable.<br>
+        - Rather than running a heavyweight guest OS, containers effectively partition the resources of the host OS using namespaces and security features to isolate themselves and create completely independent operating environments without reproducing all the underpinnings and without a hypervisor.<br>
+        - All of this results in faster spool-up times for containers and more instances packed onto a given piece of hardware, saving big $ for enterprises vs VMs.
     </aside>
 </section>
 
@@ -63,16 +183,16 @@
 	<h2>framework for service encapsulation</h2>
     <p>But what are the implications of this for <b>developers</b>, <b>ops</b>, and <b>orgs</b>?</p>
     <aside class="notes">
-    	- ...and Docker proposes to implement that pattern of encapsulation and standardization for the software development community, by packaging services with their minimal dependencies in a way that can be run anywhere: ship, train or truck, or aws, azure or on prem as the case may be, without collision between their contents or dependencies.
-    	- All of which sounds nice - but what are the practical implications of this brave new modularized world? Given this technology, what would you actually do with it? What are the opportunities and challenges it presents? 
-    	- *lead the class in an open discussion for 10-15min on opportunities and challenges of service encapsulation. Highlight opportunities for monolith densification; microservice architecture; and removal of friction between ops and dev. Highlight challenges of process and node brokerage; orchestration; and management issues (security, registry, RBAC...)*
-    	- *mention roll on / roll off shipping coming between break bulk and full containerization to lead them to monolith densification if necessary.* 
-    	- *discuss Conway's law if necessary, to lead students to how dev and ops can work more effectively together, particularly in a service-oriented org.*
+    	- The fundamental tooling Docker provides is a framework to use containerization in production, by packaging services with their minimal dependencies in a way that can be run anywhere: ship, train or truck, or aws, azure or on prem as the case may be, without collision between their contents or dependencies, via the most resource efficient strategy we currently have.<br>
+    	- All of which sounds nice - but what are the practical implications of this brave new modularized world? Given this technology, what would you actually do with it? What are the opportunities and challenges it presents? <br>
+    	- *lead the class in an open discussion for 10-15min on opportunities and challenges of service encapsulation. Highlight opportunities for monolith densification; microservice architecture; and removal of friction between ops and dev. Highlight challenges of process and node brokerage; orchestration; and management issues (security, registry, RBAC...)*<br>
+    	- *mention roll on / roll off shipping coming between break bulk and full containerization to lead them to monolith densification if necessary.* <br>
+    	- *discuss Conway's law if necessary, to lead students to how dev and ops can work more effectively together, particularly in a service-oriented org.*<br>
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	
+	<h2>Distributed Application Architecture</h2>
 	<p>Encapsulation supercharges:</p>
 	<ul>
 		<li>Monolith Densification</li>
@@ -82,8 +202,8 @@
 	<p>But all three of these things are served by an added layer of abstraction that simplifies the coordination of encapsulated services. <i>Distributed Application Architecture</i> is that abstraction.</p>
 	
     <aside class="notes">
-    	- In all these cases we've talked about, there's a common theme: encapsulation and standardization make it easy to spin up lots of these processes in lots of different contexts, by design - but this gets us into situations where we need to coordinate between all these processes at once, possibly in varying numbers, and possibly across varying numbers of machines. 
-    	- So, we want not only to encapsulate our processes, but abstract away the concept of individual processes while developing, and individual nodes while deploying.
+    	- In all these cases we've talked about, there's a common theme: encapsulation and standardization make it easy to spin up lots of these processes in lots of different contexts, by design - but this gets us into situations where we need to coordinate between all these processes at once, possibly in varying numbers, and possibly across varying numbers of machines.<br>
+    	- So, we want not only to encapsulate our processes, but abstract away the concept of individual processes while developing, and individual nodes while deploying.<br>
     </aside>
 </section>
 
@@ -93,8 +213,8 @@
 	<p>and deploy on</p>
     <h2>Networks, not nodes.</h2>
     <aside class="notes">
-        - The mental model that provides this abstraction is called distributed application architecture, and Docker provides the tools to make this paradigm simple to develop and deploy for.
-    	- the first half of the docker way of doing things, is to federate encapsulated processes into a single service, and similary federate many nodes into a single swarm, and make these services and swarms the first-class conceptual objects with which you will interact.
+        - The mental model that provides this abstraction is called distributed application architecture, and Docker provides the tools to make this paradigm simple to develop and deploy for.<br>
+    	- the first half of the docker way of doing things, is to federate encapsulated processes into a single service, and similary federate many nodes into a single swarm, and make these services and swarms the first-class conceptual objects with which you will interact.<br>
     </aside>
 </section>
 
@@ -103,37 +223,165 @@
 	<h2>virtuous circle between dev and ops</h2>
 	<p>via service-oriented registry, RBAC, and control planes - thus modernizing the entire software supply chain.</p>
     <aside class="notes">
-    	- the other half of the docker way of doing things is to use the portability of software containers to bring dev and ops closer together.
-    	- in practise, if we're going to be moving so seamlessly between dev and ops, we need the right enterprise tooling to coordinate all these transactions, between containers but especially between humans - after modernizing the encapsulation of services, we also had to build the infrastructure of the entire software supply chain around that; no sense having a shipping container on a horse-drawn carriage!
+    	- the other half of the docker way of doing things is to use the portability of software containers to bring dev and ops closer together.<br>
+    	- in practice, if we're going to be moving so seamlessly between dev and ops, we need the right enterprise tooling to coordinate all these transactions, between containers but especially between humans - after modernizing the encapsulation of services, we also had to build the infrastructure of the entire software supply chain around that; no sense having a shipping container on a horse-drawn carriage!<br>
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-	<h3>Docker helps build, ship and run apps by:</h3>
+    <h3>Docker helps build, ship and run apps by:</h3>
     <ul>
-    	<li>Making containerization of services easy</li>
-    	<li>Making service orchestration across processes and machines easy</li>
-    	<li>Eliminating friction between development and deployment</li>
+        <li>Making containerization of services easy</li>
+        <li>Making service orchestration across processes and machines easy</li>
+        <li>Eliminating friction between development and deployment</li>
     </ul>
     <p>Docker provides a suite of enterprise-grade tools that perform all of the above.</p>
     <div style='text-align: center'>
-	    <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-cloud.png'></img>
-    	<img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-compose.png'></img>
-	    <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-ddc.png'></img>
-    	<img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-dtr.png'></img>
-	    <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-machine.png'></img>
-    	<img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-swarm.png'></img>
-	    <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-ucp.png'></img>
-	</div>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-cloud.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-compose.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-ddc.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-dtr.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-machine.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-swarm.png'></img>
+        <img style='max-width:10%; background-color:rgba(0,0,0,0);' src='images/docker-ucp.png'></img>
+    </div>
     <aside class="notes">
-    	- All this business about encapsulation and standardization is what Docker does better than anyone else out there; we call this 'containerization'.
-    	- As we also saw so far, containerization naturally leads to the need to coordinate containers, and even machines; we call this 'orchestration'.
-    	- Finally, Docker also empowers developers and ops managers to work more closely together through the lifetime of a service, by removing barriers between dev and ops.
-    	- Docker endeavors to provide the tooling to make containerization, orchestration, and frictionless deployment straightforward.
+        - All this business about encapsulation and standardization is what Docker does better than anyone else out there; we call this 'containerization'.<br>
+        - As we also saw so far, containerization naturally leads to the need to coordinate containers, and even machines; we call this 'orchestration'.<br>
+        - Finally, Docker also empowers developers and ops managers to work more closely together through the lifetime of a service, by removing barriers between dev and ops.<br>
+        - Docker endeavors to provide the tooling to make containerization, orchestration, and frictionless deployment straightforward.<br>
     </aside>
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Docker Platform</h2>
+    <img src='images/platform.png'></img>
+
+    <aside class='notes'>
+        - What all that tooling looks like in practice is the Docker platform, which looks something like this.<br>
+        - Everything we do at Docker is arranged around the three central concerns of building, shipping and running applications.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Developer tools to build containerized apps</h2>
+    <img style='float:left; max-width:40%;' src='images/platform-build.png'></img>
+    <div style='float:right; max-width:55%'>
+        <p><b>Docker for Mac / PC</b> sets up a dev environment in a few clicks:</p>
+        <ul>
+            <li><b>Docker Engine</b> runs locally in a single VM</li>
+            <li><b>Docker Compose</b> orchestrates multiple containers on one machine</li>
+            <li><b>Docker Swarm</b> orchestrates multiple machines, and schedules containers across them</li>
+            <li><b>Docker Client</b> provides a CLI for Engine</li>
+            <li><b>Kitematic</b> provides a free GUI</li>
+        </ul>
+    </div>
+
+    <aside class='notes'>
+        - Everything a developer needs to start building applications in the distributed architecture paradigm is available through Docker for Mac/PC: Docker Engine, the core runtime that executes Docker commands, a CLI and GUI to interact with Engine, and Compose and Swarm, our tools for orchestrating containers into services and machines into networks, creating those abstractions advertised earlier.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Secure Exchange of Images between Dev and Ops</h2>
+    <img style='display:inline; max-width:40%;' src='images/platform-ship.png'></img>
+    <div style='float:right; max-width:55%'>
+        <ul>
+            <li><b>Image Registry</b> stores all your Docker images in the cloud or in your network</li>
+            <li>Control <b>access and permissions</b> by user or org</li>
+            <li><b>Content trust</b> to sign trusted images</li>
+            <li><b>Web UI</b> for convenient repo management</li>
+            <li>Integrate CI/CD systems to <b>automate workflows</b></li>
+        </ul>
+        <div style='margin-top:1em'>
+            <div style='float:left; max-width:47%'>
+                <h3>Trusted Registry</h3>
+                <ul>
+                    <li>Security Scanning</li>
+                    <li>LDAP/AD integration</li>
+                    <li>Flexible storage support</li>
+                    <li>User audit logs</li>
+                    <li>Garbage collection</li>
+                </ul>
+            </div>
+            <div style='float:right; max-width:47%'>
+                <h3>Dockerhub</h3>
+                <ul>
+                    <li>Security Scanning</li>
+                    <li>Webhooks</li>
+                    <li>Autobuilds</li>
+                    <li>Official Images</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <aside class='notes'>
+        - That virtuous circle between ops and dev we promised is underwritten by the shipping tools Docker provides, in the form of registries and content trust.<br>
+        - Primary concerns are RBAC, image provenance, protection of private assets, and image security scanning.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Deploy & Manage Dockerized Apps Anywhere</h2>
+    <img style='display:inline; max-width:40%;' src='images/platform-run.png'></img>
+    <div style='float:right; max-width:55%'>
+        <ul>
+            <li><b>Management Console</b> for on-prem, cloud, and hybrid deployments</li>
+            <li>Deploy & manage <b>services</b> & <b>multi-node networks</b></li>
+            <li><b>Image, network and service management</b> all in one place</li>
+            <li><b>Registry integration</b> to manage roles, users and teams</li>
+            <li><b>System metrics</b> like monitoring, logs and history.</li>
+        </ul>
+        <div style='margin-top:1em'>
+            <div style='float:left; max-width:47%'>
+                <h3>Universal Control Plane</h3>
+                <ul>
+                    <li>LDAP integration & RBAC</li>
+                    <li>High availability mode</li>
+                    <li>TLS encryption</li>
+                </ul>
+            </div>
+            <div style='float:right; max-width:47%'>
+                <h3>Docker Cloud</h3>
+                <ul>
+                    <li>Secure link to IaaS clouds</li>
+                    <li>Provision hosts and clusters</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <aside class='notes'>
+        - Finally when it comes time to run these apps in production, Docker Datacenter and all its constituent parts provides the infrastructure necessary for addressing enterprise concerns at scale.<br>
+        - Essentially, DDC is Compose and Swarm running under the hood to orchestrate containers across heterogeneous infrastructure, with a bunch of security, trust and management tooling on top.<br>
+
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>About Docker Inc.</h2>
+    <div style='float:left; max-width:45%; text-align:left;'>
+        <h3>Commercial Docker Solutions</h3>
+        <ul>
+            <li>Addresses all concerns in the enterprise software supply chain: security, access, ease-of-use</li>
+            <li>Official providers of commercial tech support</li>
+        </ul>
+        <h3>Docker Project Sponsor</h3>
+        <ul>
+            <li>Maintainer and primary contributor to the Docker open source project</li>
+            <li>1B+ image downloads</li>
+            <li>1500+ contributors</li>
+            <li>200k+ Dockerized apps</li>
+        </ul>
+    </div>
+    <img style='float:right; max-width:45%' src='images/adoption.png'></img>
+</section>
+
+
+
+
+<!--section data-background="#1AAAF8" class="blue_bg">
 	<h3>Docker Engine</h3>
     <img style='background-color:rgba(0,0,0,0);' src='images/basic-engine.png'></img>
     <p>One Docker Engine runs on every linux host, using tools like kernel namespacing and control groups to enable the creation of isolated containers.</p>
@@ -173,7 +421,7 @@
     	- CS engine
     	- RBAC
     </aside>
-</section>
+</section-->
 
 <section data-background="#1AAAF8" class="blue_bg">
 	<h2>Docker Training</h2>
