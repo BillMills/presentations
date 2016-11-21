@@ -1,24 +1,41 @@
-
 <section data-background="images/title-whale.png" class="blue_bg">
 	<h2>Introduction to Containerization with Docker</h2>
 	<aside class="notes">
-        - A first intro to containerization with Docker.
-        - prereqs: none
-        - length: 4h
-        - setup: TBD
-        - topics covered:
-          - intro to linux containers
-          - docker installation
-          - docker machine, engine and cli
-          - intro to images & Dockerfiles
-          - image registries (Dockerhub)
-          - volumes
-          - basic networking
+
 	</aside>
 </section>
                 
 <section data-background="#1AAAF8" class="blue_bg">
+    <h2>Warm up exercise:</h2>
+    <a href='https://www.katacoda.com/docker-training/courses/containerization-101'>https://www.katacoda.com/docker-training/courses/containerization-101</a>
+    <p>"Starting and Inspecting a Container"</p>
+
     <aside class="notes">
-    	
+    	- Let's start by firing up a container right away, and exploring a few details of exactly what's going on when we start a container.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Container Isolation</h2>
+    <img src='images/pid-tree.png' style='float:left; max-width:50%'></img>
+    <ul style='float:right; max-width: 47%;'>
+        <li>Containers are formed by namespacing resources from the host machine - PID tree, kernel, network etc</li>
+        <li>Command specified by `docker run` is always PID 1 inside the container; will have a higher PID on the host machine but is <i>part of the same PID tree</i></li>
+        <li>Container only runs as long as the process specified in `docker run`.</li>
+        <li>`containerd` is in charge of starting, stopping and destroying containers; built on top of runc (https://runc.io) and `libcontainer`.</li>
+    </ul>
+
+    <aside class="notes">
+         - besides the basic syntax for starting a container, the first example illustrated the contrast between the pid tree inside and outside of the container. Unlike VMs, Docker containers don't create a whole new virtual operating system; they essentially partition the kernel of the host using kernel and network namespaces, among other core linux features.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exercise: Interactive Containers</h2>
+    <a href='https://www.katacoda.com/docker-training/courses/containerization-101'>https://www.katacoda.com/docker-training/courses/containerization-101</a>
+    <p>"Interactive Containers"</p>
+
+    <aside class="notes">
+        - Now that we've run a single process in a container, let's explore interacting with running containers.
     </aside>
 </section>
