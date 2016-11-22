@@ -31,11 +31,33 @@
 </section>
 
 <section data-background="#1AAAF8" class="blue_bg">
-    <h2>Exercise: Interactive Containers</h2>
+    <h2>Exercises: Working with Containers</h2>
     <a href='https://www.katacoda.com/docker-training/courses/containerization-101'>https://www.katacoda.com/docker-training/courses/containerization-101</a>
-    <p>"Interactive Containers"</p>
+    <p>Please do all the scenarios remaining in this unit. Work with the people sitting near you, ask questions and talk about anything that is unclear! Topics:</p>
+    <ul>
+        <li>Creating, starting, stopping and deleting containers</li>
+        <li>Writing to the container file system</li>
+        <li>Investigating container logs and metadata</li>
+    </ul>
 
     <aside class="notes">
-        - Now that we've run a single process in a container, let's explore interacting with running containers.
+        - Most of the rest of container basics are syntax; rather than a show-and-tell, go ahead and jump in by following the rest of the demos on Katacoda. Work with your colleagues and talk about everything you see!
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Container Basics Takeaways</h2>
+    <ul>
+        <li>Containers all run a single primary process as their own PID 1; stop that process, and the container itself stops.</li>
+        <li>Writing to a container writes only to that instance of the container - not the underlying image.</li>
+        <li>Create new containers with `docker run`; destroy old ones with `docker rm`</li>
+        <li>Start and stop containers with `docker start`, `docker stop` and `docker kill`</li>
+        <li>Interact with containers via `docker exec` and `docker attach`</li>
+        <li>Investigate container's PID 1 with `docker logs`, the container itself with `docker inspect`, and all containers with `docker ps`</li>
+    </ul>
+
+    <aside class="notes">
+        - The key conceptual take-aways for container basics are the first two points; the container's main process, which it labels PID 1, will stop the container when it itself stops; and writing to the container's file system writes only to that container, not the underlying image; soon we'll learn more about these underlying images, and how to manipulate them.<br>
+        - Everything else we learned in this unit is basic creation, deletion and investigation syntax.<br>
     </aside>
 </section>
