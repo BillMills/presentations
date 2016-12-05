@@ -1,0 +1,200 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+	<h2>Creating Images</h2>
+	<aside class="notes">
+		In our discussion of running containers, we took the existance of these things called 'images' for granted, using them as the templates to define a container. In this module, we'll explore images in-depth, including a focus on creating and modifying images.
+	</aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Images are Layered Filesystems</h2>
+    <ul style='float:left; max-width: 47%;'>
+    	<li>Images are composed of a stack of read-only layers.</li>
+    	<li>Each stack begins with a <i>base image</i>.</li>
+    	<li><i>Copy on write</i> strategy shares layers between images and containers to optimise performance.</li>
+    </ul>
+    <img src='images/lfs-1.png' style='float:right; max-width:50%'></img>
+
+    <aside class="notes">
+    	 - Images are composed in layers; each layer consists of a bunch of files that capture how this layer adapts the one beneath it.<br>
+    	 - These stacks of layers always start with a base image, which typically captures only the base operating system for this image.<br>
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+	<h2>Sharing Layers</h2>
+	<img src='images/lfs-2.png'></img>
+	<ul>
+		<li>Images can share layers in order to speed up transfer times and optimize disk and memory usage.</li>
+		<li>Parent images that already exists on the host do not have to be downloaded.</li>
+	</ul>
+
+	<aside class="notes">
+    	 - Layering has two main benefits: it allows any image to serve as the starting point for a new image (by adding more layers on top), and it offers a performance benefit by allowing us to share identical layers on disk and in memory between images and running containers.
+	</aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Writable Container Layer</h2>
+    <ul style='float:left; max-width: 47%;'>
+    	<li>`docker run` creates a top writable layer for containers.</li>
+    	<li>Parent images are read only.</li>
+    	<li>All changes are made at the writeable layer.</li>
+    	<li>When changing a file from a read only layer, the copy on write system will copy the file into the writable layer.</li>
+    </ul>
+    <img src='images/lfs-3.png' style='float:right; max-width:50%'></img>
+
+    <aside class="notes">
+    	 - Starting a container essentially adds a single writable layer to the image stack; since Docker is just adding this one thin layer, container startup is very fast and resource efficient.<br>
+    	 - Any manipulations of the filesystem a container does is written only to this R/W layer; all image layers are always read-only.<br>
+    	 - When a container edits a file from the base image, then and only then is that file copied to the R/W layer; this is what is meant by Docker's 'copy on write' filesystem; this also implies that the copy of a file that is visible in a running container is whichever copy of that file sits highest in the stack of filesystem layers.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Creating Images</h2>
+    <p>There are three methods by which an image can be created:</p>
+    <ul>
+    	<li>Commit the R/W container layer as a new RO image layer.</li>
+    	<li>Define new layers to add to a starting image in a <i>Dockerfile</i>.</li>
+    	<li>Import a tarball into Docker as a standalone base layer</li>
+    </ul>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Committing Container Changes</h2>
+    <ul>
+    	<li>Allows us to build images interactively, via terminal access to a running container.</li>
+    	<li>Once satisfied with the state of a running container, the `docker commit` command saves the R/W layer as a new RO image layer, thus creating a new image.</li>
+    </ul>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Interactive Image Creation</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/interactive-image-creation">https://www.katacoda.com/docker-training/courses/creating-images/interactive-image-creation</a>
+    <p>Scenario: Interactive Image Creation</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Image Namespaces</h2>
+    <p>Images exist in one of three namespaces:</p>
+    <ul>
+    	<li><b>root</b>, like <pre>ubuntu:14.04</pre> or <pre>nginx</pre>, for official images.</li>
+    	<li><b>user / org</b>, like <pre>username/myapp:1.0</pre>, for sharing images on Docker Hub.</li>
+    	<li><b>self hosted</b>, like <pre>registry.mycompany.org:5000/myapp</pre>, for images hosted on a private registry.</li>
+    </ul>
+
+    <aside class="notes">
+    	- In the exercise we made our new image under our user namespaces, but there are actually three namespaces that images can live in.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Dockerfiles</h2>
+    <p>A Dockerfile is a configuration file that contains instructions for building a Docker image.</p>
+    <ul>
+    	<li>Essentially a contents manifest; doubles as documentation for image layers.</li>
+    	<li>Allows integration of image creation into automated systems like CI/CD</li>
+    </ul>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Dockerfiles</h2>
+    <ul>
+    	<li>All Dockerfiles begin with a `FROM` command that defines the image to base this new image off of.</li>
+    	<li>Each subsequent command adds a layer to the image's file system</li>
+    	<li>Once complete, the Dockerfile is used to build the image via `docker build`.</li>
+    </ul>
+
+    <pre>
+    	# Comments begin with the pound sign
+    	FROM ubuntu:14.04
+    	RUN apt-get update
+    	ADD /data /myapp/data
+    	...
+    </pre>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Creating Images with Dockerfiles</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/creating-images-with-dockerfiles">https://www.katacoda.com/docker-training/courses/creating-images/creating-images-with-dockerfiles</a>
+    <p>Scenario: Creating Images with Dockerfiles (steps 1-3)</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Build Output</h2>
+    <img src='images/build-output.png'></img>
+
+    <aside class="notes">
+    	 - So far in the exercise, we've built some basic images from a Dockerfile. After running `docker build`, we should see some output that looks like this, with steps corresponding to each of the commands in the Dockerfile, either building that layer or fetching it from the cache.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Build Context</h2>
+    <img src='images/build-context.png'></img>
+    <ul>
+    	<li>The build context is the directory that the Docker client sends to the Docker daemon during the docker build command.</li>
+    	<li>Directory is sent as an archive.</li>
+    	<li>Docker daemon will build using the files available in the context.</li>
+    	<li>Specifying “.” for the build context means to use the current directory.</li>
+    </ul>
+
+    <aside class="notes">
+    	 - The build process regularly mentions something called the build context - this is essentially the batch of files available to the docker daemon to build the image with. Everything needed from the local machine for building the image must be included in the build context.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Examining the Build Process</h2>
+    <ul>
+    	<li>
+    		Each command after the `FROM` command launches a new container based on the image thusfar, and executes in that container:
+    		<img src='images/process-1.png'></img>
+    	</li>
+    	<li>
+    		At the end of each command, the resulting container's read-write layer is committed as a new image layer, and the container is deleted:
+    		<img src='images/process-2.png'></img>
+    	</li>
+    	<li>
+    		This is repeated for all commands in the Dockerfile; when the final command is complete, the resulting image is returned with the name and tag specified in the docker build command:
+    		<img src='images/process-3.png'></img>
+    	</li>
+    </ul>
+
+    <p>Note that the only thing persisted between commands are things written to the filesystem - NOT state like filesystem position or running processes!</p>
+
+    <aside class="notes">
+    	 - Building with dockerfiles does the same thing as an interactive build under the hood; each command other than `FROM` starts a container on the image thusfar, executes, and then commits the resulting container's r/w layer as the newest image layer on the top of the image stack.<br>
+    	 - A common rookie mistake is to forget the final point: stateful things are NOT persisted from command to command! So doing something like cd'ing into a directory in one command and then executing a script in another will fail or produce unexpected results.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Examining the Build Process</h2>
+
+    <p>This:</p>
+    <pre>
+    	RUN cd /src
+    	RUN bash setup.sh
+    </pre>
+
+    <p>is different than this:</p>
+    <pre>
+    	RUN cd /src && bash setup.sh
+    </pre>
+    
+    <p>because every Dockerfile command runs in a different container, and only the filesystem, not the in-memory state, is persisted from layer to layer.</p>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Build Cache</h2>
+    <ul>
+    	<li>Docker saves a snapshot of the image after each build step.</li>
+    	<li>Before executing a step, Docker checks to see if it has already run that build sequence previously.</li>
+    	<li>If yes, Docker will use the result of that instead of executing the instruction again.</li>
+    	<li>Docker uses exact strings in your Dockerfile to compare with the cache; <b>simply changing the order of instructions will invalidate the cache.</b></li>
+    	<li>To disable the cache manually use the <pre>--no-cache</pre> flag when running <pre>docker build</pre>.</li>
+    </ul>
+
+</section>
