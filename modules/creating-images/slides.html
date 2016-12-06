@@ -182,7 +182,7 @@
     <pre>
     	RUN cd /src && bash setup.sh
     </pre>
-    
+
     <p>because every Dockerfile command runs in a different container, and only the filesystem, not the in-memory state, is persisted from layer to layer.</p>
 
 </section>
@@ -198,3 +198,199 @@
     </ul>
 
 </section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Default Commands via `CMD` and `ENTRYPOINT`</h2>
+    <ul>
+    	<li>Recall all containers run a process as their PID 1: <pre>docker run <image> <command></pre></li>
+    	<li><pre>CMD</pre> and <pre>ENTRYPOINT</pre> allow us to specify defaults in the Dockerfile</li>
+    	<li>Main difference between the two is that <pre>CMD</pre> is overridden by a command supplied in <pre>docker run</pre>, but <pre>ENTRYPOINT</pre> is not.</li>
+    </ul>
+
+    <aside class='notes'>
+    	- Another pair of helpful commands in Dockerfiles are CMD and ENTRYPOINT<br>
+    	- These are used for specifying default processes and options to run in containers created from this image.<br>
+    	- The differences between the two are a bit subtle; let's explore them in the next few steps of the exercise.
+    </aside>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Creating Images with Dockerfiles</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/creating-images-with-dockerfiles">https://www.katacoda.com/docker-training/courses/creating-images/creating-images-with-dockerfiles</a>
+    <p>Scenario: Creating Images with Dockerfiles (steps 4-6)</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Default Commands via `CMD` and `ENTRYPOINT`</h2>
+    <ul>
+    	<li><pre>CMD</pre> alone provides a default command and list of parameters for that command to run in a container created from this image.</li>
+    	<li><pre>CMD</pre> combined with <pre>ENTRYPOINT</pre> provides default parameters for the command specified by <pre>ENTRYPOINT</pre>.</li>
+    	<li><pre>CMD</pre> is always overridden by command arguments to <pre>docker run</pre>, but <pre>ENTRYPOINT</pre> is not.</li>
+    	<li>The <pre>ENTRYPOINT</pre> command itself can be overridden with the <pre>--entrypoint</pre> flag to <pre>docker run</pre>.</li>
+    </ul>
+
+    <aside class='notes'>
+    	 - In practice, CMD is for providing overridable defaults, while ENTRYPOINT is for making a container act more like an executable.<br>
+    	 - Oftentimes images are designed to do exactly one thing; CMD and ENTRYPOINT allow you to bake that intention right into the image, by pre-specifying that command.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Shell vs. exec format</h2>
+   	<p>Superficially, the following two syntaxes for <pre>CMD</pre> and <pre>ENTRYPOINT</pre> commands are the same:</p>
+   	<ul>
+   		<li><pre>apt-get update</pre> (shell form)</li>
+   		<li><pre>["apt-get", "update"]</pre> (exec form)</li>
+   	</ul>
+   	<p>But there are some subtle differences:</p>
+   	<ul>
+   		<li>Shell form allows for the parsing of variables like <pre>CMD sudo -u ${USER} java ...</pre></li>
+   		<li>Exec form can run in a container with no shell; shell form always runs via <pre>/bin/sh -c</pre></li>
+   		<li>Shell form for <pre>ENTRYPOINT</pre> prevents options from being overridden by <pre>CMD</pre> or <pre>docker run</pre>.</li>
+   		<li>Note that exec form is formal JSON - double quotes mandatory.</li>
+   	</ul>
+
+    <aside class='notes'>
+    	 - CMD, ENTRYPOINT and RUN commands can use either exec or shell syntax<br>
+    	 - exec is generally preferred for ENTRYPOINT, since it preserves the ability to override options.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>"It works on my laptop, I swear!"</h2>
+
+    <p>To build a simple Java application, we typically need:</p>
+    <ul>
+    	<li>The Java Development Kit (JDK)</li>
+    	<li>The Java Virtual Machine (JVM)</li>
+    	<li>A bunch of case-specific libraries and other deps</li>
+    </ul>
+    <p>A perfectly healthy Java app will therefore break when migrated to a new environment if:</p>
+    <ul>
+    	<li>Missing JDK / JVM</li>
+    	<li>Wrong versions of JDK or JVM</li>
+    	<li>Missing libraries</li>
+    	<li>Wrong versions of libraries</li>
+    </ul>
+    <p>Capturing all dependencies and environment setup steps in a Dockerfile is the easiest way to make your application reliably portable.</p>
+
+    <aside class='notes'>
+    	- Now that we've written a basic Dockerfile, we have (most of) what we need to begin containerizating applications.<br>
+    	- A big part of the promise of Docker is to let us run any app, anywhere, by making our running environments encapsulated and portable<br>
+    	- Writing a Dockerfile allows us to set up a containerized environment by following the same steps we would setting up on bare metal, making it as easy as possible to take what you know about deploying your app, and translating that essentially literally into a containerized environment.
+    </aside>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Dockerizing an Application</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/dockerizing-an-application">https://www.katacoda.com/docker-training/courses/creating-images/dockerizing-an-application</a>
+    <p>Scenario: Dockerizing an Application</p>
+
+    <aside class='notes'>
+    	Please ensure all student lab machines are using Linux kernel version 4.2.0-30-generic. Certain older kernel versions such as 4.2.0-23-generic contain a flaw whereby Java processes running in a Docker container will freeze and refuse to terminate. Not even a sudo kill -9 [pid] will shut down the process. The Docker container will refuse to shutdown and you won’t be able to restart the engine. Eventually the process becomes a zombie process and chews up all the VM resources, effectively destroying the machine.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>`COPY` and `ADD` commands</h2>
+
+    <p><pre>COPY</pre> copies files from a source in your build context to a destination in your image:</p>
+    <pre>COPY <src> <dest></pre>
+
+    <p>The <pre>ADD</pre> command is nearly identical, with identical syntax; <pre>ADD</pre> can however automatically unpack tar files and fetch things from URLs.</p>
+
+    <p>In both cases, a checksum for the files added is calculated and logged in the build cache; the cache will be invalidated if the checksum mismatches, so that files will be re-added if they've changed since the last <pre>docker build</pre>.</p>
+
+    <aside class='notes'>
+    	 - We saw the COPY command in the last exercise; there is also the nearly identical ADD command. In either case, the build process is smart enough to use a checksum against the files to be added to bust the cache in the case that those files have changed; otherwise, updates to those files wouldn't get picked up by the build process as nothing in the Dockerfile itself appears different.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>`MAINTAINER` and `ENV` commands</h2>
+
+    <ul>
+    	<li>
+    		<pre>MAINTAINER</pre> allows us to bake a maintainer identity right into the image:
+    		<pre>MAINTAINER Docker Training <education@docker.com></pre>
+    	</li>
+    	<li>
+    		<pre>ENV</pre> allows environment variables to be set inside our images:
+    		<pre>ENV APP_PORT 8080</pre>
+    	</li>
+    	<li>Many more Dockerfile commands are available; see the docs at <a href="https://docs.docker.com/engine/reference/builder/">https://docs.docker.com/engine/reference/builder/</a></li>
+    </ul>
+
+    <aside class='notes'>
+    	- We've only touched on the greatest hits of Dockerfile commands; see the docs for more.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Dockerfile best practises: layers</h2>
+
+    <ul>
+    	<li>Start from an official image, like <pre>ubuntu</pre>, <pre>postgres</pre> or <pre>nginx</pre>. These are vetted for security by Docker and vendor partners.</li>
+    	<li>Avoid making an unneccesarily large number of layers by combining similar commands, either via native utility functionality (<pre>RUN pip install x y z</pre> rather than installing x, y and z with separate <pre>RUN</pre> commands), or by chaining commands together with <pre>&&</pre>. Don't add deps you don't really need.</li>
+    	<li>One <pre>ENTRYPOINT</pre> per Dockerfile.</li>
+    </ul>
+
+    <aside class='notes'>
+    	- Now that we have the mechanics of making Dockerfiles, there's also a number of optional best practises to consider.<br>
+    	- Base your images off of official images whenever possible; you can recognize these on Dockerhub as they don't have an explicit namespace like vendor/product; they're just single-word names, possibly with a tag. These are all battle-tested images produced in collaboration between the product vendors and Docker, and are scanned regularly for security vulnerabilities.<br>
+    	- Deciding exactly what to combine into how many layers is a bit of an art; too many layers can make building and running cumbersome, but too few results in illegible Dockerfiles.<br>
+    	- Not only does only the last ENTRYPOINT in a Dockerfile actually have an effect, but more fundamentally, a container only ever runs a single process; good image design demands making minimal images with just enough installed to run the one process this container is desgined to run.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Dockerfile best practises: caching</h2>
+    <p>Use the caching system to your advantage for faster build times:</p>
+    <ul>
+    	<li>The order of commands matters, since as soon as one layer has to be rebuilt, the cache is abandoned for all subsequrnt layers.</li>
+    	<li>Therefore, put things that don't change often nearer the top of your Dockerfile.</li>
+    	<li>Remember that <pre>COPY</pre> and <pre>ADD</pre> perform checksums against everything they include in the image; if anything changes, the whole cache is invalidated from that point on.</li>
+    </ul>
+
+    <img src='images/bad-cache.png'></img>
+
+    <aside class='notes'>
+    	- One of the most common things for new users to struggle with is using the build cache well.<br>
+    	- Make sure to put oft-changing things near the bottom of the Dockerfile, so changing them doesn't invalidate the cache for your foundational dependencies. Most Dockerfiles start with a bunch of dependency installation that rarely changes.<br>
+    	- Common gotcha is to forget that <pre>RUN</pre> doesn't perform any checksums against resources it references. In the figure, if anything in the webapp directory has changed, the cache will be busted and the install procedure will be rerun, even if requirements.txt wasn't the thing that changed.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Dockerfile best practises: caching</h2>
+    <p>Better caching behavior will come from the Dockerfile below:</p>
+    <ul>
+    	<li>Only <pre>requirements.txt</pre> is added by <pre>ADD</pre>, so the checksum is for that file alone.</li>
+    	<li>Therefore, the cache won't be invalidated if <pre>requirements.txt</pre> hasn't changed, and the <pre>RUN</pre> command can be grabbed from the cache without reinstalling</li>
+    	<li>The rest of the contents of <pre>./webapp</pre> can be picked up afterwards.</li>
+    </ul>
+
+    <img src='images/bad-cache.png'></img>
+
+    <aside class='notes'>
+    	- Here's a more deft use of the cache, that avoids reinstallation unless absolutely necessary.<br>
+    	- The other side of the no-checksum-for-RUN-commands coin is that sometimes the cache is used even when things have changed; common example is RUN commands to pull a git repo. If the literal RUN command hasn't changed in the Dockerfile and no previous line has busted the cache, the RUN command will get pulled from the cache no matter how different your remote repo is since last time you built.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Module Summary</h2>
+
+    <ul>
+    	<li>Images are built out of read-only layers.</li>
+    	<li>Creating a container adds a thin read-write layer on top of an image; images and containers share substrate layers wherever possible.</li>
+    	<li>Images are built up by committing the R/W container layer, one at a time.</li>
+    	<li>This can be done by hand, but is very cumbersome.</li>
+    	<li>Preferred method for building images is via Dockerfiles.</li>
+    	<li>Key Dockerfile commands: <pre>FROM</pre>, <pre>RUN</pre>, <pre>COPY</pre> and <pre>ENTRYPOINT</pre></li>
+    	<li>Key API object for building images: <pre>docker build</pre></li>
+    </ul>
+
+</section>
+
+
