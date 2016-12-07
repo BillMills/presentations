@@ -1,0 +1,83 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+	<h2>Managing Images</h2>
+	<aside class="notes">
+		- Now that we've learned how to create images, we'd like to share them with collaborators or the community, and how to manage our collection of images locally.
+	</aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Tagging Images</h2>
+
+    <p>In addition to a namespace and name, an image can be labled with a tag, most commonly used for semantic version or similarly to a branch in a git repo. Syntax for tagging an image in the <pre>ghopper</pre> namespace, naming the image <pre>example</pre> and tagging it <pre>1.0</pre>:</p>
+    <ul>
+    	<li>By image ID: <pre>docker tag edfc212de17b ghopper/example:1.0</pre></li>
+    	<li>By preexisting tag: <pre>docker tag someimage:latest ghopper/example:1.0</pre></li>
+    </ul>
+
+    <aside class='notes'>
+		- As we work on images, we may want to be able to return to previous waypoints in the project, like any versioned piece of software; tagging provides for this.    	 
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Distributing Images</h2>
+
+    <p>Images can be shared one of two ways:</p>
+    <ul>
+    	<li>Via a registry, either on the web (hub.docker.com) or on private servers (Docker Trusted Registry)</li>
+    	<li><pre>docker save</pre> and <pre>docker load</pre></li>
+    </ul>
+
+    <aside class='notes'>
+    	 - Given that the core promise of containerization is portability, we'd best have some mature methods for moving images around; your best and most scalable bet is via an image registry. Everyone can freely use Dockerhub for posting and sharing images both publicly and privately; enterprise customers get access to DTR, which is essentially a local instance of the same thing, with added features like RBAC.<br>
+    	 - See our Enterprise Operations course for more on DTR; for this class, we'll use the free Dockerhub.<br>
+    	 - docker save and docker load are api objects for saving and loading images to files, for sharing by any means available.
+    </aside>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Managing Images</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/managing-images">https://www.katacoda.com/docker-training/courses/creating-images/managing-images</a>
+    <p>Scenario: Managing Images</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker Hub Repos</h2>
+
+    <ul>
+    	<li>Everything pushed to Docker Hub must be namespaced by the owner's (either user or org) account name when the image is named.</li>
+    	<li>Good things to put in Docker Hub docs: links to the Dockerfile that generated this image, links to any novel applications installed in this image, and running instructions.</li>
+    	<li>Docker Hub repos are public by default! Private repos are available, but see Docker Trusted Registry for an enterprise-grade image exchange solution.</li>
+    </ul>
+
+    <aside class='notes'>
+    	 - In the exercise, you saw how to name and tag an image for sharing on Docker Hub.<br>
+    	 - Make sure to provide the key documentation necessary for understanding and running your image.<br>
+    	 - Docker Hub is a public registry - repos can be private, but Docker Trusted Registry is the enterprise solution for exchaning images on your own servers.
+    </aside>
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Private Images</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/private-images">https://www.katacoda.com/docker-training/courses/creating-images/private-images</a>
+    <p>Scenario: Private Images</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Image Management Takeaways</h2>
+
+    <ul>
+    	<li>Use <pre>docker tag</pre> to tag your images like you would any other software project - with branch names or semantic versions.</li>
+    	<li>Docker Hub is a free public registry for sharing images; <pre>docker push</pre>, <pre>docker pull</pre> and <pre>docker login</pre> will communicate with Docker Hub by default.</li>
+    	<li>Delete old images with <pre>docker rmi</pre></li>
+    </ul>
+
+</section>
+
+
+
+
+
+
+
+
