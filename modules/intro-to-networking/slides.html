@@ -1,0 +1,144 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+    <h2>Introduction to Docker Networking</h2>
+    <aside class="notes">
+    	[Instructor aside: this module is intended to bridge between one day of introduction to containerization, and one day of introduction to orchestration. As such it can equally well go at the end of the first or the beginning of the second, or be omitted entirely if the workshop isn't introducing orchestration].<br>
+        - At this point, we've learned the basics of building, shipping, and running code encapsulated in a container; we can write Dockerfiles to capture our running environments, build images with those dockerfiles, run containers from those images that encapsulate our processes, and share those images with collaborators or integrate them into CI.<br>
+        - Now that we're running individual containers, the next major topic to explore is orchestration: how do we make many containers all work together to form a single application? This pattern is the basis of distributed application architecture.<br>
+        - To begin, we'll learn in this module about the basics of networking containers together by hand.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Container Network Model</h2>
+
+    <img src='images/cnm-simplified.png'></img>
+
+    <aside class='notes'>
+    	- At high level, docker thinks about networking with an abstraction called the Container Network Model that consists of 3 parts:<br>
+    	- The container sandbox, which firewalls containers by default.<br>
+    	- The network endpoint, which serves as a controlled port in and out of the container sandbox<br>
+    	- The network itself, which is any device that facilitates inter-container communication.<br>
+    	- If you think about it for a moment, the CNM is in some sense very vague; anything that satisfies these requirements are valid implementation options. Just like we saw with containerization itself, Docker leverages battle-tested kernel features and linux tools to realize the CNM in practise.
+    </aside>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Linux Bridges</h2>
+
+    <ul>
+    	<li>Essentially a virtualized network switch</li>
+    	<li>Provides level 2 packet routing (ie routing between MAC addresses)</li>
+    	<li>Docker creates a linux bridge called <pre>docker0</pre> automatically, assigns it a random IP and subnet, and plugs all new containers into it by default.</li>
+    	<li>Containers do not have a public IP assigned to them by default, and the linux bridge's network stack firewalls them from all external traffic.</li>
+    </ul>
+
+    <aside class='notes'>
+    	- the workhorse of Docker networking is the linux bridge; this is what serves the 'network' part of the container network model.<br>
+    	- the linux bridge is essentially a level 2 packet router, which knows how to send traffic between MAC addresses.<br>
+    	- Every host running docker engine creates a linux bridge called docker0. It is assigned a random IP and subnet (per RFC 1918) when created, and all containers are by default assigned a MAC address and plugged into this container and subnet.<br>
+    </aside>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>The Bridge Network</h2>
+
+    <img src='images/bridge1.png'></img>
+
+    <aside class='notes'>
+    	- Here's the docker0 linux bridge in action with one container plugged into it.<br>
+    	- The linux brdige serves the 'network' part of the CNM; recall there was also the container sandbox and network endpoint to specify.<br>
+    	- Linux provides network sandboxing capabilities through network namespaces. Each container is sandboxed per the CNM with its own network namespace.<br>
+    	- Network endpoints consist of a virtual ethernet connection to the linux bridge external to the container, and the eth0 connection internally.<br>
+    	- This is the default network configuration for all containers.
+
+    </aside>
+
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Basic Container Networking</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/docker-networks">https://www.katacoda.com/docker-training/courses/creating-images/docker-networks</a>
+    <p>Scenario: Introduction to Container Networking</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Network Firewalls</h2>
+
+    <img src='images/disjoint-network.png'></img>
+
+    <aside class='notes'>
+    	- In the exercise, we started with a situation like the one pictured, the key takeaway being that these networks are firewalled from each other by default.
+    </aside>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Network Firewalls</h2>
+
+    <img src='images/overlap-network.png'></img>
+
+    <pre>docker network connect my_bridge u2</pre>
+
+    <aside class='notes'>
+    	- By connecting one of our containers to both networks, we produced the network topology we sought: u2 could connect to everyone, but u1 was isolated from u3 and u4
+    </aside>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Security Warning</h2>
+
+    <p>Do not use the <pre>host</pre> network in production.</p>
+
+    <aside class='notes'>
+    	- In the exercise, you might have noticed two other networks that exist by default when we used `docker network ls` - `host` and `none`. A popular security mistake arises when people plug containers into the `host` network; this allows the container to see all network traffic on the host machine!<br>
+    	- while this can be convenient in development or debugging, this shouldn't be used in production.<br>
+    	- The `none` network creates a container with no active network interface - these containers won't be reachable by anyone.
+    </aside>
+
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Exposing Container Ports</h2>
+
+ 	<ul>
+ 		<li>Containers have no public IP address by default, and are reachable only locally via their host's linux bridge.</li>
+ 		<li>If we want a service to be reachable by the outside world, we must map a container port to a host port.</li>
+ 		<li>Ports can be mapped manually or automatically.</li>
+ 		<li>Port mappings visible via <pre>docker ps</pre> or <pre>docker port</pre></li>
+ 	</ul>
+
+    <aside class='notes'>
+    	- An axiom of Docker security can be thought of as 'isolated by default'<br>
+    	- In terms of networking, this implies that containers are not reachable from the outside world by default.<br>
+    	- Port mappings have to be set up if a containerized process is to be reachable directly.
+    </aside>
+
+</section>
+
+<section data-background="#00a2a1" class="green_bg">
+	<h2><img src="images/icon_task.png" class="slide_icon" alt="icon"> Task: Exposing Container Ports</h2>
+    <a href="https://www.katacoda.com/docker-training/courses/creating-images/container-ports">https://www.katacoda.com/docker-training/courses/creating-images/container-ports</a>
+    <p>Scenario: Introduction to Container Port Management</p>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker Networking Takeaways</h2>
+
+    <ul>
+    	<li>Docker networks on a single host use linux bridges to route traffic between containers</li>
+    	<li>Separate Docker networks are firewalled from each other by default</li>
+    	<li>Containers are firewalled from the outside world by default, but can expose ports on the host</li>
+    	<li>The <pre>docker network</pre> API object allows for the creation and management of networks and connections</li>
+    	<li>Advanced networking: <a href='https://success.docker.com/Datacenter/Apply/Docker_Reference_Architecture%3A_Designing_Scalable,_Portable_Docker_Container_Networks'>https://success.docker.com/Datacenter/Apply/Docker_Reference_Architecture%3A_Designing_Scalable,_Portable_Docker_Container_Networks</a></li>
+    </ul>
+
+    <aside class='notes'>
+    	- The key takeaway for Docker container networking is the paradigm of isolation by default. Containers must be explicitly connected to the same network to talk to each other; leverage this to easily improve the security of your applications.<br>
+    	- Similarly, containers are not exposed on the external network by default; they must explicitly have ports mapped to the host if they are to be reachable by the outside world. Do not expose or map ports unnecessarily, as this leads to port conflicts and security risks!<br>
+    	- There's a lot more to Docker networking, including the ability to create container networks that span multiple hosts. For much more detail, see Docker Training's Advanced Networking module, or the corresponding reference architecture linked above.s
+    </aside>
+
+</section>
