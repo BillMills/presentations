@@ -1,0 +1,55 @@
+<section data-background="images/title-whale.png" class="blue_bg">
+    <h2>Docker in CI</h2>
+    <aside class="notes">
+        - So far, we've learned the basics of creating images, running containers and interacting with Docker Hub, our first registry service. We now have enough bits and pieces to explore the fundamentals of continuous integration with Docker.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Traditional CI</h2>
+
+    <img src='images/traditional-ci.png'></img>
+
+    <aside class="notes">
+        - In a standard CI setup, new code passes through a testing server before making its way to production.<br>
+        - A common pain point is getting code to run and pass tests in every environment in the pipeline: from development laptop to CI server to production server.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Downstream Containerization in CI</h2>
+
+    <img src='images/docker-ci-1.png'></img>
+
+    <aside class="notes">
+        - One way to remove most of this pain is to have testing servers encapsulate new code in an image, so that it's guaranteed to run the same on all susbsequent steps of the pipeline.<br>
+        - This is nice since it is completely transparent to developers, but is only a partial solution; there can still be friction migrating code between development and testing servers.
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Container-first pipeline with Image Autobuilding</h2>
+
+    <img src='images/docker-ci-2.png'></img>
+
+    <aside class="notes">
+        - To address this, getting developers to capture their execution environment in a Dockerfile and develop their applications in a container to begin with can completely remove shipping problems at all points in the CI pipeline.<br>
+        - To facilitate this, Docker Hub can be configured to automatically build an image from a Dockerfile when the GitHub or Bitbucket repo hosting that Dockerfile is updated.<br>
+        - In theory could have developers just push their images, but this has the disadvantage of obfuscating what exactly went into the image, and loses the fine-grained version control developers like working with; image autobuilds from code repos are minimally disruptive to existing workflows
+    </aside>
+</section>
+
+<section data-background="#1AAAF8" class="blue_bg">
+    <h2>Docker CI Takeaways</h2>
+
+    <ul>
+        <li>Containerization is a natural tool for migrating applications through a pipeline of environments, as in CI.</li>
+        <li>Docker Hub can automatically build images from a Dockerfile pushed to GitHub or Bitbucket, to trigger this process with minimal disruption of the current workflow and tooling of a development team.</li>
+    </ul>
+
+    <aside class="notes">
+        - We've seen some of the nuts and bolts of automated builds for use in CI pipelines, but there's actually a bigger issue: the question posed by CI gatekeeping - whether tests pass for a piece of code - is actually context dependent. A CI environment that observes all tests to pass, but doesn't match the production environment, is meaningless. Containerization provides the portability of execution context necessary to make CI both smooth and maximally meaningful.<br>
+        - Because containers smooth out testing so well, some CI services like Travis offer the option to easily test code within a container, rather than setting up a testing environment natively.<br>
+        - [consider leading a discussion with the class on designing a more detailed CI pipeline that leverages containers; ask them to describe their existing CI pipeline and then brainstorm how to containerize things]. 
+    </aside>
+</section>
